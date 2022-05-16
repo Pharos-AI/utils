@@ -217,6 +217,30 @@ public without sharing class Log {
 
     /**
     * Add Log with Integration Category.
+    * This method will automatically get the stacktrace from Exception.
+    * @param area -- log record Functional Area (see Area enum)
+    * @param e -- instance of an Exception
+    * @param request -- RestRequest of the issue. Saves to log record Details field
+    * @param response -- RestResponse of the issue. Saves to log record Details field
+    */
+    public void addIntegrationError(Area area, Exception e, RestRequest request, RestResponse response) {
+        this.logger.add(
+                newBuilder()
+                        .category(Category.Integration.name())
+                        .type(String.isBlank(e.getTypeName()) ? Type.Backend.name() : e.getTypeName())
+                        .area(area.name())
+                        .summary(e.getMessage())
+                        .details(String.valueOf(e) + SPACE_SEP + e.getStackTraceString())
+                        .stackTrace(e.getStackTraceString())
+                        .attribute('pharos__Stacktrace_Parse_Result__c', JSON.serialize(new IntegrationWrapper(
+                                new pharos.HttpRequestWrapper(request).formatRequest(),
+                                new pharos.HttpResponseWrapper(response).formatResponse()
+                        )))
+                        .build());
+    }
+
+    /**
+    * Add Log with Integration Category.
     * This method will automatically get the stacktrace.
     * @param type -- log record Type (see Type enum)
     * @param area -- log record Functional Area (see Area enum)
@@ -239,6 +263,34 @@ public without sharing class Log {
                         new pharos.HttpRequestWrapper(request).formatRequest(),
                         new pharos.HttpResponseWrapper(response).formatResponse()
                 )))
+                        .build());
+        resetStackOffset();
+    }
+
+    /**
+    * Add Log with Integration Category.
+    * This method will automatically get the stacktrace.
+    * @param type -- log record Type (see Type enum)
+    * @param area -- log record Functional Area (see Area enum)
+    * @param summary -- summary of the issue. Saves to log record Summary field
+    * @param details -- details of the issue. Saves to log record Details field
+    * @param request -- RestRequest of the issue. Saves to log record Details field
+    * @param response -- RestResponse of the issue. Saves to log record Details field
+    */
+    public void addIntegrationError(Type type, Area area, String summary, String details, RestRequest request, RestResponse response) {
+        incStackOffset();
+        this.logger.add(
+                newBuilder()
+                        .category(Category.Integration.name())
+                        .type(type.name())
+                        .area(area.name())
+                        .summary(summary)
+                        .details(details)
+                        .stackTrace(this.logger.getCurrentStackTrace(stackOffset))
+                        .attribute('pharos__Stacktrace_Parse_Result__c', JSON.serialize(new IntegrationWrapper(
+                                new pharos.HttpRequestWrapper(request).formatRequest(),
+                                new pharos.HttpResponseWrapper(response).formatResponse()
+                        )))
                         .build());
         resetStackOffset();
     }
@@ -337,6 +389,19 @@ public without sharing class Log {
 
     /**
     * Save Log with Integration Category.
+    * This method will automatically get the stacktrace from Exception.
+    * @param area -- log record Functional Area (see Area enum)
+    * @param e -- instance of an Exception
+    * @param request -- RestRequest of the issue. Saves to log record Details field
+    * @param response -- RestResponse of the issue. Saves to log record Details field
+    */
+    public void integrationError(Area area, Exception e, RestRequest request, RestResponse response) {
+        addIntegrationError(area, e, request, response);
+        flush();
+    }
+
+    /**
+    * Save Log with Integration Category.
     * This method will automatically get the stacktrace.
     * @param type -- log record Type (see Type enum)
     * @param area -- log record Functional Area (see Area enum)
@@ -346,6 +411,22 @@ public without sharing class Log {
     * @param response -- HttpResponse of the issue. Saves to log record Details field
     */
     public void integrationError(Type type, Area area, String summary, String details, HttpRequest request, HttpResponse response) {
+        incStackOffset();
+        addIntegrationError(type, area, summary, details, request, response);
+        flush();
+    }
+
+    /**
+    * Save Log with Integration Category.
+    * This method will automatically get the stacktrace.
+    * @param type -- log record Type (see Type enum)
+    * @param area -- log record Functional Area (see Area enum)
+    * @param summary -- summary of the issue. Saves to log record Summary field
+    * @param details -- details of the issue. Saves to log record Details field
+    * @param request -- RestRequest of the issue. Saves to log record Details field
+    * @param response -- RestResponse of the issue. Saves to log record Details field
+    */
+    public void integrationError(Type type, Area area, String summary, String details, RestRequest request, RestResponse response) {
         incStackOffset();
         addIntegrationError(type, area, summary, details, request, response);
         flush();
@@ -442,6 +523,19 @@ public without sharing class Log {
 
     /**
     * Save Log with Integration Category in a Queueable.
+    * This method will automatically get the stacktrace from Exception.
+    * @param area -- log record Functional Area (see Area enum)
+    * @param e -- instance of an Exception
+    * @param request -- RestRequest of the issue. Saves to log record Details field
+    * @param response -- RestResponse of the issue. Saves to log record Details field
+    */
+    public void integrationErrorAsync(Area area, Exception e, RestRequest request, RestResponse response) {
+        addIntegrationError(area, e, request, response);
+        flushAsync();
+    }
+
+    /**
+    * Save Log with Integration Category in a Queueable.
     * This method will automatically get the stacktrace.
     * @param type -- log record Type (see Type enum)
     * @param area -- log record Functional Area (see Area enum)
@@ -451,6 +545,22 @@ public without sharing class Log {
     * @param response -- HttpResponse of the issue. Saves to log record Details field
     */
     public void integrationErrorAsync(Type type, Area area, String summary, String details, HttpRequest request, HttpResponse response) {
+        incStackOffset();
+        addIntegrationError(type, area, summary, details, request, response);
+        flushAsync();
+    }
+
+    /**
+    * Save Log with Integration Category in a Queueable.
+    * This method will automatically get the stacktrace.
+    * @param type -- log record Type (see Type enum)
+    * @param area -- log record Functional Area (see Area enum)
+    * @param summary -- summary of the issue. Saves to log record Summary field
+    * @param details -- details of the issue. Saves to log record Details field
+    * @param request -- RestRequest of the issue. Saves to log record Details field
+    * @param response -- RestResponse of the issue. Saves to log record Details field
+    */
+    public void integrationErrorAsync(Type type, Area area, String summary, String details, RestRequest request, RestResponse response) {
         incStackOffset();
         addIntegrationError(type, area, summary, details, request, response);
         flushAsync();
