@@ -487,6 +487,70 @@ public without sharing class Log {
         return pharos.LogBuilder.getInstance();
     }
 
+    @AuraEnabled
+    public static void saveComponentLogs(List<ComponentLog> componentLogs) {
+        pharos.Logger logger = pharos.Logger.getInstance();
+        for (ComponentLog componentLog : componentLogs) {
+            logger.add(
+                    newBuilder()
+                            .category(String.isNotBlank(componentLog.category) ? componentLog.category : componentLog.component.category)
+                            .type(String.isNotBlank(componentLog.type) ? componentLog.type : componentLog.error != null ? componentLog.error.type : Type.Frontend.name())
+                            .area(String.isNotBlank(componentLog.area) ? componentLog.area : componentLog.component.name)
+                            .summary(String.isNotBlank(componentLog.summary) ? componentLog.summary : componentLog.error != null ? componentLog.error.message : null)
+                            .stackTrace(componentLog.stack)
+                            .details(String.isNotBlank(componentLog.details) ? componentLog.details : componentLog.stack)
+                            .attribute(pharos__Log__c.pharos__Apex_Name__c.getDescribe().getName(), componentLog.component.name + '.' + componentLog.component.function)
+                            .attribute(pharos__Log__c.pharos__Related_Id__c.getDescribe().getName(), componentLog.recordId)
+                            .attribute(pharos__Log__c.pharos__Related_Object_Type__c.getDescribe().getName(),
+                                    Schema.getGlobalDescribe().get(componentLog.objectApiName) != null
+                                            ? Schema.getGlobalDescribe().get(componentLog.objectApiName).getDescribe().label
+                                            : componentLog.objectApiName)
+                            .build());
+        }
+        logger.flush();
+    }
+
+    public class ComponentLog {
+        @AuraEnabled
+        public String category { get; set; }
+        @AuraEnabled
+        public String type { get; set; }
+        @AuraEnabled
+        public String area { get; set; }
+        @AuraEnabled
+        public String summary { get; set; }
+        @AuraEnabled
+        public String details { get; set; }
+        @AuraEnabled
+        public String recordId { get; set; }
+        @AuraEnabled
+        public String objectApiName { get; set; }
+        @AuraEnabled
+        public String stack { get; set; }
+        @AuraEnabled
+        public Error error { get; set; }
+        @AuraEnabled
+        public Component component { get; set; }
+    }
+
+    public class Error {
+        @AuraEnabled
+        public String message { get; set; }
+        @AuraEnabled
+        public String stack { get; set; }
+        @AuraEnabled
+        public String type { get; set; }
+    }
+
+    public class Component {
+        @AuraEnabled
+        public String category { get; set; }
+        @AuraEnabled
+        public String name { get; set; }
+        @AuraEnabled
+        public String function { get; set; }
+    }
+
     //new line separator for formatting
     private static final String SPACE_SEP = '\n\n';
 
