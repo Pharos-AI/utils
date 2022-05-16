@@ -118,7 +118,7 @@ export default class Logger extends LightningElement {
     }
 
     /**
-     * Saves any logs in Logger's buffer, using the specified save method for only this call.
+     * Commit all logs previously added using the addXXX() methods.
      */
     @api
     flush() {
