@@ -11,7 +11,7 @@ const LogBuilder = class {
      * Sets the log Category field
      */
     setCategory(category) {
-        this.category = category;
+        if (category) this.category = category;
         return this;
     }
 
@@ -19,7 +19,7 @@ const LogBuilder = class {
      * Sets the log Type field
      */
     setType(type) {
-        this.type = type;
+        if (type) this.type = type;
         return this;
     }
 
@@ -27,7 +27,7 @@ const LogBuilder = class {
      * Sets the log Area field
      */
     setArea(area) {
-        this.area = area;
+        if (area) this.area = area;
         return this;
     }
 
@@ -35,7 +35,7 @@ const LogBuilder = class {
      * Sets the log Summary field
      */
     setSummary(summary) {
-        this.summary = summary;
+        if (summary) this.summary = summary;
         return this;
     }
 
@@ -43,7 +43,7 @@ const LogBuilder = class {
      * Sets the log Details field
      */
     setDetails(details) {
-        this.details = details;
+        if (details) this.details = details;
         return this;
     }
 
@@ -51,7 +51,7 @@ const LogBuilder = class {
      * Sets the log RecordId field
      */
     setRecordId(recordId) {
-        this.recordId = recordId;
+        if (recordId) this.recordId = recordId;
         return this;
     }
 
@@ -59,7 +59,7 @@ const LogBuilder = class {
      * Sets the log ObjectApiName field
      */
     setObjectApiName(objectApiName) {
-        this.objectApiName = objectApiName;
+        if (objectApiName) this.objectApiName = objectApiName;
         return this;
     }
 
@@ -67,11 +67,13 @@ const LogBuilder = class {
      * Sets the log Exception field
      */
     setError(error) {
-        this.error = {};
-        this.error.message = error.message;
-        this.error.stack = error.stack;
-        this.error.type = error.name;
-        this._setComponentDetails(this.error.stack);
+        if (error) {
+            this.error = {};
+            this.error.message = error.message;
+            this.error.stack = error.stack;
+            this.error.type = error.name;
+            this._setComponentDetails(this.error.stack);
+        }
         return this;
     }
 
@@ -85,7 +87,7 @@ const LogBuilder = class {
                 if (!this.component.category && (stackTraceLine.includes('/modules/') || stackTraceLine.includes('/components/'))) {
                     this.component.category = stackTraceLine.includes('/modules/') ? 'LWC' : 'Aura';
                     this.component.name = stackTraceLine.substring(stackTraceLine.lastIndexOf('/') + 1, stackTraceLine.lastIndexOf('.js'));
-                    this.component.function = stackTraceLine.substring(stackTraceLine.indexOf(this.component.type === 'LWC' ? '.' : 'at ') + (this.component.type === 'LWC' ? 1 : 3), stackTraceLine.lastIndexOf(' ('));
+                    this.component.function = stackTraceLine.substring(stackTraceLine.indexOf(this.component.category === 'LWC' ? '.' : 'at ') + (this.component.category === 'LWC' ? 1 : 3), stackTraceLine.lastIndexOf(' ('));
                 }
                 stackTraceLines.push(stackTraceLine);
             });

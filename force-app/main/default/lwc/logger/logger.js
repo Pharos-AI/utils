@@ -14,7 +14,7 @@ export default class Logger extends LightningElement {
      * Details will be a combination of Exception String and stacktrace
      */
     @api
-    exception(error) {
+    addException(error) {
         return this._newLogBuilder().setError(error);
     }
 
@@ -22,7 +22,7 @@ export default class Logger extends LightningElement {
      * Add Log with LWC / Aura Category.
      */
     @api
-    error() {
+    addError() {
         return this._newLogBuilder();
     }
 
@@ -30,7 +30,7 @@ export default class Logger extends LightningElement {
      * Add Log with Warning Category.
      */
     @api
-    warning() {
+    addWarning() {
         return this._newLogBuilder().setCategory(CATEGORY.WARNING);
     }
 
@@ -38,7 +38,7 @@ export default class Logger extends LightningElement {
      * Add Log with Debug Category.
      */
     @api
-    debug() {
+    addDebug() {
         return this._newLogBuilder().setCategory(CATEGORY.DEBUG);
     }
 
@@ -46,8 +46,75 @@ export default class Logger extends LightningElement {
      * Add Log with Event Category.
      */
     @api
-    info() {
+    addInfo() {
         return this._newLogBuilder().setCategory(CATEGORY.EVENT);
+    }
+
+    /**
+     * Save Log with LWC / Aura Category.
+     * This method will automatically get the stacktrace from Exception.
+     * Type will be obtained from Exception. If blank, a default Frontend Type will be saved
+     * Summary is the Exception message.
+     * Details will be a combination of Exception String and stacktrace
+     */
+    @api
+    exception(error) {
+        return this._newLogBuilder().setError(error);
+    }
+
+    /**
+     * Save Log with LWC / Aura Category.
+     */
+    @api
+    error(type, area, summary, details) {
+        this._newLogBuilder()
+            .setType(type)
+            .setArea(area)
+            .setSummary(summary)
+            .setDetails(details);
+        this.flush();
+    }
+
+    /**
+     * Save Log with Warning Category.
+     */
+    @api
+    warning(type, area, summary, details) {
+        this._newLogBuilder()
+            .setCategory(CATEGORY.WARNING)
+            .setType(type)
+            .setArea(area)
+            .setSummary(summary)
+            .setDetails(details);
+        this.flush();
+    }
+
+    /**
+     * Save Log with Debug Category.
+     */
+    @api
+    debug(type, area, summary, details) {
+        this._newLogBuilder()
+            .setCategory(CATEGORY.DEBUG)
+            .setType(type)
+            .setArea(area)
+            .setSummary(summary)
+            .setDetails(details);
+        this.flush();
+    }
+
+    /**
+     * Save Log with Event Category.
+     */
+    @api
+    info(type, area, summary, details) {
+        this._newLogBuilder()
+            .setCategory(CATEGORY.EVENT)
+            .setType(type)
+            .setArea(area)
+            .setSummary(summary)
+            .setDetails(details);
+        this.flush();
     }
 
     /**
