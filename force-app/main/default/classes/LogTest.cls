@@ -172,6 +172,90 @@ private class LogTest {
 
         assertCreatedIntegrationLog();
     }
+    @IsTest
+    private static void test_integration_error_sync() {
+        test_integration_error(false);
+    }
+
+    @IsTest
+    private static void test_integration_error_async() {
+        test_integration_error(true);
+    }
+
+    private static void test_integration_error(Boolean isAsync) {
+        assertBefore();
+
+        Test.startTest();
+        RestRequest req = new RestRequest();
+        RestResponse res = new RestResponse();
+        req.requestURI = '/services/apexrest/Account/testId';
+        req.httpMethod = 'GET';
+        RestContext.request = req;
+        RestContext.response = res;
+        if (isAsync) {
+            Log.instance.integrationErrorAsync(Log.Type.Backend, Log.Area.Community, 'test summary', 'test details', req, res);
+        } else {
+            Log.instance.integrationError(Log.Type.Backend, Log.Area.Community, 'test summary', 'test details', req, res);
+        }
+        Test.stopTest();
+
+        List<pharos__Log__c> logs = [SELECT Id, pharos__Summary__c, pharos__Hash__c FROM pharos__Log__c];
+        System.assertEquals(1, logs.size());
+        System.assertEquals('test summary', logs.get(0).pharos__Summary__c);
+        System.assertNotEquals(null, logs.get(0).pharos__Hash__c);
+    }
+
+    @IsTest
+    private static void test_save_component_log() {
+        assertBefore();
+
+        Test.startTest();
+        List<Log.ComponentLog> componentLogs = new List<Log.ComponentLog>();
+        Log.ComponentLog componentLog = new Log.ComponentLog();
+        componentLog.category = 'test category';
+        componentLog.type = 'test type';
+        componentLog.area = 'test area';
+        componentLog.summary = 'test summary';
+        componentLog.details = 'test details';
+        componentLog.recordId = 'recordId';
+        componentLog.objectApiName = 'objectApiName';
+        Log.Component component = new Log.Component();
+        component.category = 'test category';
+        component.name = 'test name';
+        component.function = 'test function';
+        componentLog.component = component;
+        componentLogs.add(componentLog);
+        Log.saveComponentLogs(componentLogs);
+        Test.stopTest();
+
+        List<pharos__Log__c> logs = [SELECT Id, pharos__Summary__c, pharos__Hash__c FROM pharos__Log__c];
+        System.assertEquals(1, logs.size());
+        System.assertEquals('test summary', logs.get(0).pharos__Summary__c);
+        System.assertNotEquals(null, logs.get(0).pharos__Hash__c);
+    }
+
+    @IsTest
+    private static void test_flow() {
+        assertBefore();
+
+        Test.startTest();
+        List<Log.FlowLog> flowLogs = new List<Log.FlowLog>();
+        Log.FlowLog flowLog = new Log.FlowLog();
+        flowLog.category = 'test category';
+        flowLog.type = 'test type';
+        flowLog.area = 'test area';
+        flowLog.summary = 'test';
+        flowLog.details = 'test';
+        flowLog.additionalFields = '{"pharos__Summary__c":"test summary","pharos__Details__c":"test Details"}';
+        flowLogs.add(flowLog);
+        Log.flow(flowLogs);
+        Test.stopTest();
+
+        List<pharos__Log__c> logs = [SELECT Id, pharos__Summary__c, pharos__Hash__c FROM pharos__Log__c];
+        System.assertEquals(1, logs.size());
+        System.assertEquals('test summary', logs.get(0).pharos__Summary__c);
+        System.assertNotEquals(null, logs.get(0).pharos__Hash__c);
+    }
 
     public static final String TEST_ENDPOINT = 'https://test.endpoint';
 

@@ -620,6 +620,50 @@ public without sharing class Log {
         logger.flush();
     }
 
+    /**
+     * @description Invocable method, that can be called via flow.
+     * @param flowLogs The list of FlowLog instances to save
+     */
+    @InvocableMethod(Category='Logging' Label='Add Log' Description='Creates a log for a flow or process builder')
+    public static void flow(List<FlowLog> flowLogs) {
+        pharos.Logger logger = pharos.Logger.getInstance();
+        for (FlowLog flowLog : flowLogs) {
+            pharos.LogBuilder logBuilder = newBuilder()
+                    .category(flowLog.category)
+                    .type(flowLog.type)
+                    .area(flowLog.area)
+                    .summary(flowLog.summary)
+                    .details(flowLog.details);
+            if (String.isNotBlank(flowLog.additionalFields)) {
+                try {
+                    Map<String, Object> mapAdditionalFields = (Map<String, Object>)JSON.deserializeUntyped(flowLog.additionalFields);
+                    for (String field : mapAdditionalFields.keySet()) {
+                        logBuilder.attribute(field, mapAdditionalFields.get(field));
+                    }
+                } catch (Exception e) {
+                    logBuilder.details(flowLog.details + '\nAdditional Information (failed to parse json input to invokable):' + '\n' + flowLog.additionalFields);
+                }
+            }
+            logger.add(logBuilder.build());
+        }
+        logger.flush();
+    }
+
+    public class FlowLog {
+        @InvocableVariable(Required=true Label='Category')
+        public String category;
+        @InvocableVariable(Required=true Label='Type')
+        public String type;
+        @InvocableVariable(Required=true Label='Area')
+        public String area;
+        @InvocableVariable(Required=true Label='Summary')
+        public String summary;
+        @InvocableVariable(Required=true Label='Details')
+        public String details;
+        @InvocableVariable(Required=false Label='Additional Fields')
+        public String additionalFields;
+    }
+
     public class ComponentLog {
         @AuraEnabled
         public String category { get; set; }
