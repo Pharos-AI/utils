@@ -125,10 +125,10 @@ export default class Logger extends LightningElement {
         saveComponentLogs({
             componentLogs: this.logs
         }).then((data) => {
-            this.logs = [];
         }).catch(error => {
             console.error(error);
         });
+        this.logs = [];
     }
 
     _newLogBuilder() {

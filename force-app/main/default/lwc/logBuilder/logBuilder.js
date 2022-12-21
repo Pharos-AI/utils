@@ -48,6 +48,38 @@ const LogBuilder = class {
     }
 
     /**
+     * Sets the log Total Time field
+     */
+    setTotalTime(totalTime) {
+        if (totalTime) this.totalTime = totalTime;
+        return this;
+    }
+
+    /**
+     * Sets the log User Id field
+     */
+    setUserId(userId) {
+        if (userId) this.userId = userId;
+        return this;
+    }
+
+    /**
+     * Sets the log Component Name field
+     */
+    setComponent(component) {
+        if (component) this.component.name = component;
+        return this;
+    }
+
+    /**
+     * Sets the log Action field
+     */
+    setAction(action) {
+        if (action) this.component.action = action;
+        return this;
+    }
+
+    /**
      * Sets the log RecordId field
      */
     setRecordId(recordId) {
@@ -78,8 +110,8 @@ const LogBuilder = class {
     }
 
     _setComponentDetails(stack) {
+        if (!this.component) this.component = {};
         if (stack != null) {
-            this.component = {}
             let stackTraceLines = [];
             stack.split('\n').filter(
                 stackTraceLine => !stackTraceLine.includes('/c/logger.js') && !stackTraceLine.includes('/c/logBuilder.js')
@@ -100,4 +132,3 @@ const LogBuilder = class {
 export function newLogBuilder() {
     return new LogBuilder();
 }
-
