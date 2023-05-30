@@ -1,18 +1,18 @@
 public without sharing class Log {
 
 	//singleton instance
-	private final Logger logger;
+	private final pharos.Logger logger;
 	public static Log instance {
 		get {
 			if (instance == null) {
-				instance = new Log(Logger.getInstance());
+				instance = new Log(pharos.Logger.getInstance());
 			}
 			return instance;
 		}
 		private set;
 	}
 
-	private Log(Logger logger) {
+	private Log(pharos.Logger logger) {
 		this.logger = logger;
 	}
 
@@ -622,7 +622,7 @@ public without sharing class Log {
 
 	@AuraEnabled
 	public static void saveComponentLogs(List<ComponentLog> componentLogs) {
-		Logger logger = Logger.getInstance();
+		pharos.Logger logger = pharos.Logger.getInstance();
 		for (ComponentLog componentLog : componentLogs) {
 			logger.add(
 					newBuilder()
@@ -650,7 +650,7 @@ public without sharing class Log {
 	 */
 	@InvocableMethod(Category='Logging' Label='Add Log' Description='Creates a log for a flow or process builder')
 	public static void flow(List<FlowLog> flowLogs) {
-		Logger logger = Logger.getInstance();
+		pharos.Logger logger = pharos.Logger.getInstance();
 		for (FlowLog flowLog : flowLogs) {
 			LogBuilder logBuilder = newBuilder()
 					.category(flowLog.category)
