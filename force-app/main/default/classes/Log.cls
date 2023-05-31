@@ -703,9 +703,9 @@ public without sharing class Log {
         @InvocableVariable(Required=true Label='Details')
         public String details;
         @InvocableVariable(Required=true Label='Interview GUID')
-		public String interviewGUID;
-		@InvocableVariable(Required=false Label='Additional Fields')
-		public String additionalFields;
+	public String interviewGUID;
+	@InvocableVariable(Required=false Label='Additional Fields')
+	public String additionalFields;
     }
 
     public class ComponentLog {
