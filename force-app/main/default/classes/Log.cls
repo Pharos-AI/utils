@@ -15,6 +15,12 @@ public without sharing class Log {
     private Log(pharos.Logger logger) {
         this.logger = logger;
     }
+    
+    private static final String APEX_NAME_API_NAME = pharos__Log__c.Apex_Name__c.getDescribe().getName();
+    private static final String RELATED_ID_API_NAME = pharos__Log__c.Related_Id__c.getDescribe().getName();
+    private static final String RELATED_OBJECT_TYPE_API_NAME = pharos__Log__c.Related_Object_Type__c.getDescribe().getName();
+    private static final String INTERVIEW_GUID_API_NAME = pharos__Log__c.Interview_GUID__c.getDescribe().getName();
+    private static final String STACKTRACE_PARSE_RESULT_API_NAME = pharos__Log__c.Stacktrace_Parse_Result__c.getDescribe().getName();
 
     /**
     * Log classification.
@@ -107,6 +113,7 @@ public without sharing class Log {
                         .stackTrace(this.logger.getCurrentStackTrace(stackOffset))
                         .postProcessing(new PostProcessingControlsBuilder().setAll(true).build())
 			.transactionId(TRANSACTION_ID)
+			.createIssue()
                         .build());
         resetStackOffset();
     }
@@ -132,6 +139,7 @@ public without sharing class Log {
                         .details(String.valueOf(e) + SPACE_SEP + e.getStackTraceString())
                         .postProcessing(new PostProcessingControlsBuilder().setAll(true).build())
 			.transactionId(TRANSACTION_ID)
+			.createIssue()
                         .build());
     }
 
@@ -218,7 +226,8 @@ public without sharing class Log {
                         .summary(e.getMessage())
                         .details(String.valueOf(e) + SPACE_SEP + e.getStackTraceString())
                         .stackTrace(e.getStackTraceString())
-                        .attribute('pharos__Stacktrace_Parse_Result__c', JSON.serialize(new IntegrationWrapper(
+			.createIssue()
+                        .attribute(STACKTRACE_PARSE_RESULT_API_NAME, JSON.serialize(new IntegrationWrapper(
                         new pharos.HttpRequestWrapper(request).formatRequest(),
                         new pharos.HttpResponseWrapper(response).formatResponse()
                 )))
@@ -242,7 +251,8 @@ public without sharing class Log {
                         .summary(e.getMessage())
                         .details(String.valueOf(e) + SPACE_SEP + e.getStackTraceString())
                         .stackTrace(e.getStackTraceString())
-                        .attribute('pharos__Stacktrace_Parse_Result__c', JSON.serialize(new IntegrationWrapper(
+			.createIssue()
+                        .attribute(STACKTRACE_PARSE_RESULT_API_NAME, JSON.serialize(new IntegrationWrapper(
                                 new pharos.HttpRequestWrapper(request).formatRequest(),
                                 new pharos.HttpResponseWrapper(response).formatResponse()
                         )))
@@ -269,7 +279,8 @@ public without sharing class Log {
                         .summary(summary)
                         .details(details)
                         .stackTrace(this.logger.getCurrentStackTrace(stackOffset))
-                        .attribute('pharos__Stacktrace_Parse_Result__c', JSON.serialize(new IntegrationWrapper(
+			.createIssue()
+                        .attribute(STACKTRACE_PARSE_RESULT_API_NAME, JSON.serialize(new IntegrationWrapper(
                         new pharos.HttpRequestWrapper(request).formatRequest(),
                         new pharos.HttpResponseWrapper(response).formatResponse()
                 )))
@@ -297,7 +308,8 @@ public without sharing class Log {
                         .summary(summary)
                         .details(details)
                         .stackTrace(this.logger.getCurrentStackTrace(stackOffset))
-                        .attribute('pharos__Stacktrace_Parse_Result__c', JSON.serialize(new IntegrationWrapper(
+			.createIssue()
+                        .attribute(STACKTRACE_PARSE_RESULT_API_NAME, JSON.serialize(new IntegrationWrapper(
                                 new pharos.HttpRequestWrapper(request).formatRequest(),
                                 new pharos.HttpResponseWrapper(response).formatResponse()
                         )))
@@ -620,9 +632,10 @@ public without sharing class Log {
                             .stackTrace(componentLog.stack)
                             .details(String.isNotBlank(componentLog.details) ? componentLog.details : componentLog.stack)
 		    	    .transactionId(Log.instance.TRANSACTION_ID)
-                            .attribute(pharos__Log__c.pharos__Apex_Name__c.getDescribe().getName(), componentLog.component.name + '.' + componentLog.component.function)
-                            .attribute(pharos__Log__c.pharos__Related_Id__c.getDescribe().getName(), componentLog.recordId)
-                            .attribute(pharos__Log__c.pharos__Related_Object_Type__c.getDescribe().getName(),
+		    	    .createIssue()
+                            .attribute(APEX_NAME_API_NAME, componentLog.component.name + '.' + componentLog.component.function)
+                            .attribute(RELATED_ID_API_NAME, componentLog.recordId)
+                            .attribute(RELATED_OBJECT_TYPE_API_NAME,
                                     Schema.getGlobalDescribe().get(componentLog.objectApiName) != null
                                             ? Schema.getGlobalDescribe().get(componentLog.objectApiName).getDescribe().label
                                             : componentLog.objectApiName)
@@ -646,7 +659,8 @@ public without sharing class Log {
                     .summary(flowLog.summary)
                     .details(flowLog.details);
                     .transactionId(Log.instance.TRANSACTION_ID)
-		    .attribute(pharos__Log__c.pharos__Interview_GUID__c.getDescribe().getName(), flowLog.interviewGUID);
+		    .createIssue()
+		    .attribute(INTERVIEW_GUID_API_NAME, flowLog.interviewGUID);
             if (String.isNotBlank(flowLog.additionalFields)) {
                 try {
                     Map<String, Object> mapAdditionalFields = (Map<String, Object>)JSON.deserializeUntyped(flowLog.additionalFields);
