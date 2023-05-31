@@ -106,9 +106,7 @@ public without sharing class Log {
                         .details(details)
                         .stackTrace(this.logger.getCurrentStackTrace(stackOffset))
                         .postProcessing(new PostProcessingControlsBuilder().setAll(true).build())
-						.attribute(Log__c.Request_Id__c.getDescribe().getName(), System.Request.getCurrent().getRequestId())
-						.attribute(Log__c.Created_Timestamp__c.getDescribe().getName(), Double.valueOf(System.now().getTime()))
-						.attribute(Log__c.Transaction_Id__c.getDescribe().getName(), TRANSACTION_ID)
+			.transactionId(TRANSACTION_ID)
                         .build());
         resetStackOffset();
     }
@@ -133,9 +131,7 @@ public without sharing class Log {
                         .stackTrace(e.getStackTraceString())
                         .details(String.valueOf(e) + SPACE_SEP + e.getStackTraceString())
                         .postProcessing(new PostProcessingControlsBuilder().setAll(true).build())
-						.attribute(Log__c.Request_Id__c.getDescribe().getName(), System.Request.getCurrent().getRequestId())
-						.attribute(Log__c.Created_Timestamp__c.getDescribe().getName(), Double.valueOf(System.now().getTime()))
-						.attribute(Log__c.Transaction_Id__c.getDescribe().getName(), TRANSACTION_ID)
+			.transactionId(TRANSACTION_ID)
                         .build());
     }
 
@@ -156,9 +152,7 @@ public without sharing class Log {
                         .summary(summary)
                         .details(details)
                         .postProcessing(new PostProcessingControlsBuilder().userInfo(true).objectInfo(true).build())
-						.attribute(Log__c.Request_Id__c.getDescribe().getName(), System.Request.getCurrent().getRequestId())
-						.attribute(Log__c.Created_Timestamp__c.getDescribe().getName(), Double.valueOf(System.now().getTime()))
-						.attribute(Log__c.Transaction_Id__c.getDescribe().getName(), TRANSACTION_ID)
+			.transactionId(TRANSACTION_ID)
                         .build());
     }
 
@@ -181,9 +175,7 @@ public without sharing class Log {
                         .details(details)
                         .stackTrace(this.logger.getCurrentStackTrace(stackOffset))
                         .postProcessing(new PostProcessingControlsBuilder().userInfo(true).objectInfo(true).build())
-                        .attribute(Log__c.Request_Id__c.getDescribe().getName(), System.Request.getCurrent().getRequestId())
-						.attribute(Log__c.Created_Timestamp__c.getDescribe().getName(), Double.valueOf(System.now().getTime()))
-						.attribute(Log__c.Transaction_Id__c.getDescribe().getName(), TRANSACTION_ID)
+                        .transactionId(TRANSACTION_ID)
                         .build());
         resetStackOffset();
     }
@@ -205,9 +197,7 @@ public without sharing class Log {
                         .summary(summary)
                         .details(details)
                         .postProcessing(new PostProcessingControlsBuilder().userInfo(true).objectInfo(true).build())
-						.attribute(Log__c.Request_Id__c.getDescribe().getName(), System.Request.getCurrent().getRequestId())
-						.attribute(Log__c.Created_Timestamp__c.getDescribe().getName(), Double.valueOf(System.now().getTime()))
-						.attribute(Log__c.Transaction_Id__c.getDescribe().getName(), TRANSACTION_ID)
+			.transactionId(TRANSACTION_ID)
                         .build());
     }
 
@@ -629,6 +619,7 @@ public without sharing class Log {
                             .summary(String.isNotBlank(componentLog.summary) ? componentLog.summary : componentLog.error != null ? componentLog.error.message : null)
                             .stackTrace(componentLog.stack)
                             .details(String.isNotBlank(componentLog.details) ? componentLog.details : componentLog.stack)
+		    	    .transactionId(Log.instance.TRANSACTION_ID)
                             .attribute(pharos__Log__c.pharos__Apex_Name__c.getDescribe().getName(), componentLog.component.name + '.' + componentLog.component.function)
                             .attribute(pharos__Log__c.pharos__Related_Id__c.getDescribe().getName(), componentLog.recordId)
                             .attribute(pharos__Log__c.pharos__Related_Object_Type__c.getDescribe().getName(),
@@ -654,10 +645,8 @@ public without sharing class Log {
                     .area(flowLog.area)
                     .summary(flowLog.summary)
                     .details(flowLog.details);
-                    .attribute(Log__c.Request_Id__c.getDescribe().getName(), System.Request.getCurrent().getRequestId())
-					.attribute(Log__c.Created_Timestamp__c.getDescribe().getName(), Double.valueOf(System.now().getTime()))
-					.attribute(Log__c.Transaction_Id__c.getDescribe().getName(), Log.instance.TRANSACTION_ID)
-					.attribute(Log__c.Interview_GUID__c.getDescribe().getName(), flowLog.interviewGUID);
+                    .transactionId(Log.instance.TRANSACTION_ID)
+		    .attribute(pharos__Log__c.pharos__Interview_GUID__c.getDescribe().getName(), flowLog.interviewGUID);
             if (String.isNotBlank(flowLog.additionalFields)) {
                 try {
                     Map<String, Object> mapAdditionalFields = (Map<String, Object>)JSON.deserializeUntyped(flowLog.additionalFields);
@@ -682,25 +671,25 @@ public without sharing class Log {
         }
         private set;
     }
+	
+    public String startTransaction() {
+	return TRANSACTION_ID;
+    }
 
-	public String startTransaction() {
-		return TRANSACTION_ID;
-	}
+    public void resumeTransaction(String transactionId) {
+	TRANSACTION_ID = transactionId;
+    }
 
-	public void resumeTransaction(String transactionId) {
-		TRANSACTION_ID = transactionId;
-	}
+    public void stopTransaction() {
+	TRANSACTION_ID = null;
+    }
 
-	public void stopTransaction() {
-		TRANSACTION_ID = null;
-	}
-
-	public static String generateUUID4() {
-		Blob b = Crypto.generateAesKey(128);
-		String h = EncodingUtil.convertToHex(b);
-		String guid = h.substring(0,8)+ '-' + h.substring(8,12) + '-' + h.substring(12,16) + '-' + h.substring(16,20) + '-' + h.substring(20);
-		return guid;
-	}
+    public static String generateUUID4() {
+	Blob b = Crypto.generateAesKey(128);
+	String h = EncodingUtil.convertToHex(b);
+	String guid = h.substring(0,8)+ '-' + h.substring(8,12) + '-' + h.substring(12,16) + '-' + h.substring(16,20) + '-' + h.substring(20);
+	return guid;
+    }
 
     public class FlowLog {
         @InvocableVariable(Required=true Label='Category')
@@ -774,96 +763,95 @@ public without sharing class Log {
     
     public class PostProcessingControlsBuilder {
 
-		private final Map<String, Boolean> controls;
+	private final Map<String, Boolean> controls;
 
-		private final String STACK_TRACE_KEY = 'stackTrace';
-		private final String USER_INFO_KEY = 'userInfo';
-		private final String OBJECT_INFO_KEY = 'objectInfo';
-		private final String RELATED_OBJECT_TYPE_KEY = 'relatedObjectType';
-		private final String RELATED_OBJECTS_KEY = 'relatedObjects';
-		private final String FLOW_VERSION_ID_KEY = 'flowVersionId';
-		private final String DEPLOY_RESULT_KEY = 'deployResult';
-		private final String AUDIT_TRAIL_KEY = 'auditTrail';
-		private final String PENDING_JOBS_KEY = 'pendingJobs';
-		private final String TOTAL_PENDING_JOBS_KEY = 'totalPendingJobs';
-		private final String TOTAL_ACTIVE_SESSION_KEY = 'totalActiveSession';
-		private final String INSTALLED_PACKAGES_KEY = 'installedPackages';
+	private final String STACK_TRACE_KEY = 'stackTrace';
+	private final String USER_INFO_KEY = 'userInfo';
+	private final String OBJECT_INFO_KEY = 'objectInfo';
+	private final String RELATED_OBJECT_TYPE_KEY = 'relatedObjectType';
+	private final String RELATED_OBJECTS_KEY = 'relatedObjects';
+	private final String FLOW_VERSION_ID_KEY = 'flowVersionId';
+	private final String DEPLOY_RESULT_KEY = 'deployResult';
+	private final String AUDIT_TRAIL_KEY = 'auditTrail';
+	private final String PENDING_JOBS_KEY = 'pendingJobs';
+	private final String TOTAL_PENDING_JOBS_KEY = 'totalPendingJobs';
+	private final String TOTAL_ACTIVE_SESSION_KEY = 'totalActiveSession';
+	private final String INSTALLED_PACKAGES_KEY = 'installedPackages';
 
-		private PostProcessingControlsBuilder() {
-			controls = new Map<String, Boolean>{
-					STACK_TRACE_KEY => false,
-					USER_INFO_KEY => false,
-					OBJECT_INFO_KEY => false,
-					RELATED_OBJECT_TYPE_KEY => false,
-					RELATED_OBJECTS_KEY => false,
-					FLOW_VERSION_ID_KEY => false,
-					DEPLOY_RESULT_KEY => false,
-					AUDIT_TRAIL_KEY => false,
-					PENDING_JOBS_KEY => false,
-					TOTAL_PENDING_JOBS_KEY => false,
-					TOTAL_ACTIVE_SESSION_KEY => false,
-					INSTALLED_PACKAGES_KEY => false
-			};
-		}
-		public PostProcessingControlsBuilder setAll(Boolean value) {
-			for (String key : controls.keySet()) {
-				controls.put(key, value);
-			}
-			return this;
-		}
-		public PostProcessingControlsBuilder stackTrace(Boolean value) {
-			controls.put(STACK_TRACE_KEY, value);
-			return this;
-		}
-		public PostProcessingControlsBuilder userInfo(Boolean value) {
-			controls.put(USER_INFO_KEY, value);
-			return this;
-		}
-		public PostProcessingControlsBuilder objectInfo(Boolean value) {
-			controls.put(OBJECT_INFO_KEY, value);
-			return this;
-		}
-		public PostProcessingControlsBuilder relatedObjectType(Boolean value) {
-			controls.put(RELATED_OBJECT_TYPE_KEY, value);
-			return this;
-		}
-		public PostProcessingControlsBuilder relatedObjects(Boolean value) {
-			controls.put(RELATED_OBJECTS_KEY, value);
-			return this;
-		}
-		public PostProcessingControlsBuilder flowVersionId(Boolean value) {
-			controls.put(FLOW_VERSION_ID_KEY, value);
-			return this;
-		}
-		public PostProcessingControlsBuilder deployResult(Boolean value) {
-			controls.put(DEPLOY_RESULT_KEY, value);
-			return this;
-		}
-		public PostProcessingControlsBuilder auditTrail(Boolean value) {
-			controls.put(AUDIT_TRAIL_KEY, value);
-			return this;
-		}
-		public PostProcessingControlsBuilder pendingJobs(Boolean value) {
-			controls.put(PENDING_JOBS_KEY, value);
-			return this;
-		}
-		public PostProcessingControlsBuilder totalPendingJobs(Boolean value) {
-			controls.put(TOTAL_PENDING_JOBS_KEY, value);
-			return this;
-		}
-		public PostProcessingControlsBuilder totalActiveSession(Boolean value) {
-			controls.put(TOTAL_ACTIVE_SESSION_KEY, value);
-			return this;
-		}
-		public PostProcessingControlsBuilder installedPackages(Boolean value) {
-			controls.put(INSTALLED_PACKAGES_KEY, value);
-			return this;
-		}
-
-		public String build() {
-			return JSON.serialize(controls);
-		}
-
+	private PostProcessingControlsBuilder() {
+		controls = new Map<String, Boolean>{
+				STACK_TRACE_KEY => false,
+				USER_INFO_KEY => false,
+				OBJECT_INFO_KEY => false,
+				RELATED_OBJECT_TYPE_KEY => false,
+				RELATED_OBJECTS_KEY => false,
+				FLOW_VERSION_ID_KEY => false,
+				DEPLOY_RESULT_KEY => false,
+				AUDIT_TRAIL_KEY => false,
+				PENDING_JOBS_KEY => false,
+				TOTAL_PENDING_JOBS_KEY => false,
+				TOTAL_ACTIVE_SESSION_KEY => false,
+				INSTALLED_PACKAGES_KEY => false
+		};
 	}
+	public PostProcessingControlsBuilder setAll(Boolean value) {
+		for (String key : controls.keySet()) {
+			controls.put(key, value);
+		}
+		return this;
+	}
+	public PostProcessingControlsBuilder stackTrace(Boolean value) {
+		controls.put(STACK_TRACE_KEY, value);
+		return this;
+	}
+	public PostProcessingControlsBuilder userInfo(Boolean value) {
+		controls.put(USER_INFO_KEY, value);
+		return this;
+	}
+	public PostProcessingControlsBuilder objectInfo(Boolean value) {
+		controls.put(OBJECT_INFO_KEY, value);
+		return this;
+	}
+	public PostProcessingControlsBuilder relatedObjectType(Boolean value) {
+		controls.put(RELATED_OBJECT_TYPE_KEY, value);
+		return this;
+	}
+	public PostProcessingControlsBuilder relatedObjects(Boolean value) {
+		controls.put(RELATED_OBJECTS_KEY, value);
+		return this;
+	}
+	public PostProcessingControlsBuilder flowVersionId(Boolean value) {
+		controls.put(FLOW_VERSION_ID_KEY, value);
+		return this;
+	}
+	public PostProcessingControlsBuilder deployResult(Boolean value) {
+		controls.put(DEPLOY_RESULT_KEY, value);
+		return this;
+	}
+	public PostProcessingControlsBuilder auditTrail(Boolean value) {
+		controls.put(AUDIT_TRAIL_KEY, value);
+		return this;
+	}
+	public PostProcessingControlsBuilder pendingJobs(Boolean value) {
+		controls.put(PENDING_JOBS_KEY, value);
+		return this;
+	}
+	public PostProcessingControlsBuilder totalPendingJobs(Boolean value) {
+		controls.put(TOTAL_PENDING_JOBS_KEY, value);
+		return this;
+	}
+	public PostProcessingControlsBuilder totalActiveSession(Boolean value) {
+		controls.put(TOTAL_ACTIVE_SESSION_KEY, value);
+		return this;
+	}
+	public PostProcessingControlsBuilder installedPackages(Boolean value) {
+		controls.put(INSTALLED_PACKAGES_KEY, value);
+		return this;
+	}
+
+	public String build() {
+		return JSON.serialize(controls);
+	}
+    }
 
 }
