@@ -54,10 +54,7 @@ public without sharing class Log {
 	*/
 	public enum Type {
 		Backend,
-		Frontend,
-		LongRunningRequest,
-		ConcurrentRequestsLimit,
-		AccountTrigger
+		Frontend
 	}
 
 	/**
@@ -69,9 +66,7 @@ public without sharing class Log {
 	public enum Area {
 		OpportunityManagement,
 		LeadConversion,
-		Community,
-		RestAPI,
-		Accounts
+		Community
 	}
 
 	/**
