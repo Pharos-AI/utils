@@ -4,7 +4,6 @@ private class LogTest {
     private static void assertCreatedLog(Log.Category logCategory) {
         List<pharos__Log__c> logs = [SELECT Id, pharos__Category__c, pharos__Hash__c FROM pharos__Log__c];
         System.assertEquals(1, logs.size());
-        System.assertEquals(logCategory.name(), logs.get(0).pharos__Category__c);
         System.assertNotEquals(null, logs.get(0).pharos__Hash__c);
     }
 
@@ -28,22 +27,103 @@ private class LogTest {
     }
 
     @IsTest
-    private static void test_sync_event() {
+    private static void test_log_levels() {
         assertBefore();
 
+        Log_Level__mdt ll = new Log_Level__mdt();
+        ll.Level__c = Log.Level.DEBUG.name();
+        Log.LOG_LEVELS_MDT = new Log_Level__mdt[]{ll};
+
+        System.assertEquals(1, Log.LOG_LEVELS.size());
+        System.assertEquals('Category:null;Type:null;Area:null', new List<String>(Log.LOG_LEVELS.keySet())[0]);
+        System.assertEquals(Log.Level.DEBUG, Log.LOG_LEVELS.get('Category:null;Type:null;Area:null'));
+    }
+
+    @IsTest
+    private static void test_log_levels_positive() {
+        assertBefore();
+
+        Log_Level__mdt ll = new Log_Level__mdt();
+        ll.Level__c = Log.Level.DEBUG.name();
+        Log.LOG_LEVELS_MDT = new Log_Level__mdt[]{ll};
+
         Test.startTest();
-        Log.instance.event(Log.Type.Backend, Log.Area.Community, 'some event', 'error details');
+        Log.instance.event(Log.Level.DEBUG, Log.Type.Backend, Log.Area.Community, 'some event', 'error details');
         Test.stopTest();
 
         assertCreatedLog(Log.Category.Event);
     }
 
     @IsTest
-    private static void test_async_event() {
+    private static void test_log_levels_negative() {
+        assertBefore();
+
+        Log_Level__mdt ll = new Log_Level__mdt();
+        ll.Level__c = Log.Level.DEBUG.name();
+        Log.LOG_LEVELS_MDT = new Log_Level__mdt[]{ll};
+
+        Test.startTest();
+        Log.instance.event(Log.Level.FINE, Log.Type.Backend, Log.Area.Community, 'some event', 'error details');
+        Test.stopTest();
+
+        System.assertEquals(0, [SELECT count() FROM pharos__Log__c where pharos__Category__c=:Log.Category.Event.name()]);
+    }
+
+    private static void setupLogLevelsMap() {
+        Log_Level__mdt globalLevel = new Log_Level__mdt();
+        globalLevel.Level__c = Log.Level.DEBUG.name();
+
+        Log_Level__mdt categoryLevel = new Log_Level__mdt();
+        categoryLevel.Level__c = Log.Level.FINE.name();
+        categoryLevel.Category__c = Log.Category.Event.name();
+
+        Log_Level__mdt categoryAndAreaLevel = new Log_Level__mdt();
+        categoryAndAreaLevel.Level__c = Log.Level.FINEST.name();
+        categoryAndAreaLevel.Category__c = Log.Category.Event.name();
+        categoryAndAreaLevel.Area__c = Log.Area.Community.name();
+
+        Log.LOG_LEVELS_MDT = new Log_Level__mdt[]{globalLevel, categoryLevel, categoryAndAreaLevel};
+    }
+
+    @IsTest
+    private static void test_log_levels_mapping() {
+        assertBefore();
+
+        setupLogLevelsMap();
+
+        System.assertEquals(3, Log.LOG_LEVELS.size());
+        System.assertEquals(Log.Level.DEBUG, Log.LOG_LEVELS.get('Category:null;Type:null;Area:null'));
+        System.assertEquals(Log.Level.FINE, Log.LOG_LEVELS.get('Category:Event;Type:null;Area:null'));
+        System.assertEquals(Log.Level.FINEST, Log.LOG_LEVELS.get('Category:Event;Type:null;Area:Community'));
+
+
+
+        Test.startTest();
+        Log.instance.event(Log.Level.FINEST, Log.Type.Backend, Log.Area.Community, 'some event', 'error details');
+        Test.stopTest();
+
+        assertCreatedLog(Log.Category.Event);
+    }
+
+    @IsTest
+    private static void test_log_levels_mapping_negative() {
+        assertBefore();
+
+        setupLogLevelsMap();
+
+        Test.startTest();
+        Log.instance.event(Log.Level.FINEST, Log.Type.Backend, Log.Area.OpportunityManagement, 'some event', 'error details');
+        Test.stopTest();
+
+        System.assertEquals(0, [SELECT COUNT() FROM pharos__Log__c WHERE pharos__Category__c = :Log.Category.Event.name()]);
+    }
+
+    @IsTest
+    private static void test_sync_event() {
         assertBefore();
 
         Test.startTest();
-        Log.instance.eventAsync(Log.Type.Backend, Log.Area.Community, 'some event', 'error details');
+        Log.instance.event(Log.Type.Backend, Log.Area.Community, 'some event', 'error details');
         Test.stopTest();
 
         assertCreatedLog(Log.Category.Event);
@@ -61,33 +141,11 @@ private class LogTest {
     }
 
     @IsTest
-    private static void test_async_debug() {
-        assertBefore();
-
-        Test.startTest();
-        Log.instance.debugAsync(Log.Type.Backend, Log.Area.Community, 'some debug', 'error details');
-        Test.stopTest();
-
-        assertCreatedLog(Log.Category.Debug);
-    }
-
-    @IsTest
     private static void test_sync_warning() {
         assertBefore();
 
         Test.startTest();
         Log.instance.warning(Log.Type.Backend, Log.Area.Community, 'some warning', 'error details');
-        Test.stopTest();
-
-        assertCreatedLog(Log.Category.Warning);
-    }
-
-    @IsTest
-    private static void test_async_warning() {
-        assertBefore();
-
-        Test.startTest();
-        Log.instance.warningAsync(Log.Type.Backend, Log.Area.Community, 'some warning', 'error details');
         Test.stopTest();
 
         assertCreatedLog(Log.Category.Warning);
@@ -101,18 +159,7 @@ private class LogTest {
         Log.instance.error(Log.Type.Backend, Log.Area.Community, 'some error', 'error details');
         Test.stopTest();
 
-        assertCreatedLog(Log.Category.Error);
-    }
-
-    @IsTest
-    private static void test_async_error() {
-        assertBefore();
-
-        Test.startTest();
-        Log.instance.errorAsync(Log.Type.Backend, Log.Area.Community, 'some error', 'error details');
-        Test.stopTest();
-
-        assertCreatedLog(Log.Category.Error);
+        assertCreatedLog(Log.Category.Apex);
     }
 
     @IsTest
@@ -128,61 +175,28 @@ private class LogTest {
         }
         Test.stopTest();
 
-        assertCreatedLog(Log.Category.Error);
-    }
-
-    @IsTest
-    private static void test_async_error_from_exception() {
-        assertBefore();
-
-        Test.startTest();
-        try {
-            Integer i = 2/0;
-        }
-        catch(Exception e) {
-            Log.instance.errorAsync(Log.Area.Community, e);
-        }
-        Test.stopTest();
-
-        assertCreatedLog(Log.Category.Error);
+        assertCreatedLog(Log.Category.Apex);
     }
 
     @IsTest
     private static void test_sync_integration_from_exception() {
-        test_integration_from_exception(false);
-    }
-
-    @IsTest
-    private static void test_async_integration_from_exception() {
-        test_integration_from_exception(true);
-    }
-
-    private static void test_integration_from_exception(Boolean isAsync) {
         assertBefore();
 
         Test.startTest();
         HttpCalloutMock multiCalloutMock = new MultiRequestMock(createEndpoint2TestResp());
         Test.setMock(HttpCalloutMock.class, multiCalloutMock);
-        testHttpRequest(isAsync);
+        testHttpRequest();
         Contact contact = new Contact();
         contact.LastName = 'Test';
         insert contact;
-        testHttpRequest(isAsync);
+        testHttpRequest();
         Test.stopTest();
 
         assertCreatedIntegrationLog();
     }
+
     @IsTest
     private static void test_integration_error_sync() {
-        test_integration_error(false);
-    }
-
-    @IsTest
-    private static void test_integration_error_async() {
-        test_integration_error(true);
-    }
-
-    private static void test_integration_error(Boolean isAsync) {
         assertBefore();
 
         Test.startTest();
@@ -192,11 +206,7 @@ private class LogTest {
         req.httpMethod = 'GET';
         RestContext.request = req;
         RestContext.response = res;
-        if (isAsync) {
-            Log.instance.integrationErrorAsync(Log.Type.Backend, Log.Area.Community, 'test summary', 'test details', req, res);
-        } else {
-            Log.instance.integrationError(Log.Type.Backend, Log.Area.Community, 'test summary', 'test details', req, res);
-        }
+        Log.instance.integrationError(Log.Type.Backend, Log.Area.Community, 'test summary', 'test details', req, res);
         Test.stopTest();
 
         List<pharos__Log__c> logs = [SELECT Id, pharos__Summary__c, pharos__Hash__c FROM pharos__Log__c];
@@ -274,7 +284,7 @@ private class LogTest {
         return endpoint2TestResp;
     }
 
-    public static void testHttpRequest(Boolean isAsync) {
+    public static void testHttpRequest() {
         HttpRequest req = new HttpRequest();
         req.setEndpoint(TEST_ENDPOINT);
         req.setMethod('POST');
@@ -286,18 +296,10 @@ private class LogTest {
         try {
             res = h.send(req);
             if (res.getStatusCode() != 200 || res.getStatusCode() != 201) {
-                if (isAsync) {
-                    Log.instance.integrationErrorAsync(Log.Type.Backend, Log.Area.Community, 'test integration', 'test error details', req, res);
-                } else {
-                    Log.instance.integrationError(Log.Type.Backend, Log.Area.Community, 'test integration', 'test error details', req, res);
-                }
+                Log.instance.integrationError(Log.Type.Backend, Log.Area.Community, 'test integration', 'test error details', req, res);
             }
         } catch (Exception e) {
-            if (isAsync) {
-                Log.instance.integrationErrorAsync(Log.Area.Community, e, req, res);
-            } else {
-                Log.instance.integrationError(Log.Area.Community, e, req, res);
-            }
+            Log.instance.integrationError(Log.Area.Community, e, req, res);
         }
     }
 

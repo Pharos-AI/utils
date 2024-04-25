@@ -4,6 +4,10 @@ import saveComponentLogs from '@salesforce/apex/Log.saveComponentLogs';
 
 export default class Logger extends LightningElement {
 
+    /**
+     * Logs buffer
+     */
+    @api
     logs = [];
 
     /**
@@ -15,7 +19,7 @@ export default class Logger extends LightningElement {
      */
     @api
     addException(error) {
-        return this._newLogBuilder().setError(error);
+        return this._newLogBuilder().setError(error).setLevel(LEVEL.ERROR);
     }
 
     /**
@@ -23,7 +27,7 @@ export default class Logger extends LightningElement {
      */
     @api
     addError() {
-        return this._newLogBuilder();
+        return this._newLogBuilder().setLevel(LEVEL.ERROR);
     }
 
     /**
@@ -31,7 +35,7 @@ export default class Logger extends LightningElement {
      */
     @api
     addWarning() {
-        return this._newLogBuilder().setCategory(CATEGORY.WARNING);
+        return this._newLogBuilder().setCategory(CATEGORY.WARNING).setLevel(LEVEL.WARNING);
     }
 
     /**
@@ -39,7 +43,7 @@ export default class Logger extends LightningElement {
      */
     @api
     addDebug() {
-        return this._newLogBuilder().setCategory(CATEGORY.DEBUG);
+        return this._newLogBuilder().setCategory(CATEGORY.DEBUG).setLevel(LEVEL.DEBUG);
     }
 
     /**
@@ -47,7 +51,7 @@ export default class Logger extends LightningElement {
      */
     @api
     addInfo() {
-        return this._newLogBuilder().setCategory(CATEGORY.EVENT);
+        return this._newLogBuilder().setCategory(CATEGORY.EVENT).setLevel(LEVEL.INFO);
     }
 
     /**
@@ -58,20 +62,29 @@ export default class Logger extends LightningElement {
      * Details will be a combination of Exception String and stacktrace
      */
     @api
-    exception(error) {
-        return this._newLogBuilder().setError(error);
+    exception(error, transactionId) {
+        this._newLogBuilder()
+            .setError(error)
+            .setLevel(LEVEL.ERROR)
+            .setTransactionId(transactionId);
+        this.flush();
     }
 
     /**
      * Save Log with LWC / Aura Category.
      */
     @api
-    error(type, area, summary, details) {
+    error(type, area, summary, details, transactionId, component, duration, startTime) {
         this._newLogBuilder()
+            .setLevel(LEVEL.ERROR)
             .setType(type)
             .setArea(area)
             .setSummary(summary)
-            .setDetails(details);
+            .setDetails(details)
+            .setTransactionId(transactionId)
+            .setComponent(component)
+            .setDuration(duration)
+            .setCreatedTimestamp(startTime);
         this.flush();
     }
 
@@ -79,13 +92,18 @@ export default class Logger extends LightningElement {
      * Save Log with Warning Category.
      */
     @api
-    warning(type, area, summary, details) {
+    warning(type, area, summary, details, transactionId, component, duration, startTime) {
         this._newLogBuilder()
+            .setLevel(LEVEL.WARNING)
             .setCategory(CATEGORY.WARNING)
             .setType(type)
             .setArea(area)
             .setSummary(summary)
-            .setDetails(details);
+            .setDetails(details)
+            .setTransactionId(transactionId)
+            .setComponent(component)
+            .setDuration(duration)
+            .setCreatedTimestamp(startTime);
         this.flush();
     }
 
@@ -93,13 +111,18 @@ export default class Logger extends LightningElement {
      * Save Log with Debug Category.
      */
     @api
-    debug(type, area, summary, details) {
+    debug(type, area, summary, details, transactionId, component, duration, startTime) {
         this._newLogBuilder()
+            .setLevel(LEVEL.DEBUG)
             .setCategory(CATEGORY.DEBUG)
             .setType(type)
             .setArea(area)
             .setSummary(summary)
-            .setDetails(details);
+            .setDetails(details)
+            .setTransactionId(transactionId)
+            .setComponent(component)
+            .setDuration(duration)
+            .setCreatedTimestamp(startTime);
         this.flush();
     }
 
@@ -107,13 +130,18 @@ export default class Logger extends LightningElement {
      * Save Log with Event Category.
      */
     @api
-    info(type, area, summary, details) {
+    info(type, area, summary, details, level, transactionId, component, duration, startTime) {
         this._newLogBuilder()
+            .setLevel(level)
             .setCategory(CATEGORY.EVENT)
             .setType(type)
             .setArea(area)
             .setSummary(summary)
-            .setDetails(details);
+            .setDetails(details)
+            .setTransactionId(transactionId)
+            .setComponent(component)
+            .setDuration(duration)
+            .setCreatedTimestamp(startTime);
         this.flush();
     }
 
@@ -125,10 +153,10 @@ export default class Logger extends LightningElement {
         saveComponentLogs({
             componentLogs: this.logs
         }).then((data) => {
-            this.logs = [];
         }).catch(error => {
             console.error(error);
         });
+        this.logs = [];
     }
 
     _newLogBuilder() {
@@ -138,6 +166,17 @@ export default class Logger extends LightningElement {
     }
 
 }
+
+/** LOG LEVEL */
+export const LEVEL = {
+    ERROR: 'ERROR',
+    WARNING: 'WARNING',
+    INFO: 'INFO',
+    DEBUG: 'DEBUG',
+    FINE: 'FINE',
+    FINER: 'FINER',
+    FINEST: 'FINEST'
+};
 
 /** LOG CATEGORY */
 export const CATEGORY = {
