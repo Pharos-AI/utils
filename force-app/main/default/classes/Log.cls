@@ -85,7 +85,7 @@ public without sharing class Log {
                 buildLogLevelKey(null, null, null)
         };
 
-        if (String.isBlank(log.Log_Level__c)) return true;
+        if (String.isBlank(log.Log_Level__c) || LOG_LEVELS.isEmpty()) return true;
 
         Level currentLevel = Level.valueOf(log.Log_Level__c);
         for (String key : permutations) {
