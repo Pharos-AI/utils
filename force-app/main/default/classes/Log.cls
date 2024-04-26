@@ -72,6 +72,8 @@ public without sharing class Log {
     * @return -- true if current log's level is below the level set in the settings, false otherwise
     */
     public static Boolean isLogAllowedForLogLevel(pharos__Log__c log) {
+        if (String.isBlank(log.Log_Level__c) || LOG_LEVELS.isEmpty()) return true;
+
         //a set of possible mapping permutations
         //these will be checked in the same order as this list
         String[] permutations = new String[] {
@@ -84,8 +86,6 @@ public without sharing class Log {
                 buildLogLevelKey(log.pharos__Category__c, null, null),
                 buildLogLevelKey(null, null, null)
         };
-
-        if (String.isBlank(log.Log_Level__c) || LOG_LEVELS.isEmpty()) return true;
 
         Level currentLevel = Level.valueOf(log.Log_Level__c);
         for (String key : permutations) {
