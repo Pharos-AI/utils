@@ -4,7 +4,16 @@ const LogBuilder = class {
      * Constructor used to generate each log
      */
     constructor() {
+        this._setCreatedTimestamp();
         this._setComponentDetails(new Error().stack);
+    }
+
+    /**
+     * Sets the log Category field
+     */
+    setLevel(level) {
+        if (level) this.level = level;
+        return this;
     }
 
     /**
@@ -64,26 +73,67 @@ const LogBuilder = class {
     }
 
     /**
+     * Sets the transaction Id
+     */
+    setTransactionId(transactionId) {
+        if (transactionId) this.transactionId = transactionId;
+        return this;
+    }
+
+
+    /**
+     * Sets the component info structure
+     */
+    setComponent(component) {
+        if (component) {
+            if (!this.component) this.component = {};
+            this.component.name = component.name;
+            this.component.function = component.function;
+        }
+        return this;
+    }
+
+    /**
+     * Sets the duration value
+     */
+    setDuration(duration) {
+        if (duration) this.duration = duration;
+        return this;
+    }
+
+    /**
+     * Sets created timestamp
+     */
+    setCreatedTimestamp(startTime) {
+        if (startTime) this.createdTimestamp = startTime;
+    }
+
+    /**
      * Sets the log Exception field
      */
     setError(error) {
         if (error) {
             this.error = {};
-            this.error.message = error.message;
-            this.error.stack = error.stack;
-            this.error.type = error.name;
+            this.error.message = error.message ? error.message : error.body ? error.body.message : null;
+            this.error.stack = error.stack ? error.stack : error.body ? error.body.stackTrace : null;
+            this.error.type = error.name ? error.name : error.body ? error.body.exceptionType : null;
             this._setComponentDetails(this.error.stack);
         }
         return this;
     }
 
+    _setCreatedTimestamp() {
+        this.createdTimestamp = Date.now();
+    }
+
     _setComponentDetails(stack) {
         if (stack != null) {
-            this.component = {}
+            if (!this.component) this.component = {}
             let stackTraceLines = [];
             stack.split('\n').filter(
                 stackTraceLine => !stackTraceLine.includes('/c/logger.js') && !stackTraceLine.includes('/c/logBuilder.js')
             ).forEach(stackTraceLine => {
+                console.log(stackTraceLine);
                 if (!this.component.category && (stackTraceLine.includes('/modules/') || stackTraceLine.includes('/components/'))) {
                     this.component.category = stackTraceLine.includes('/modules/') ? 'LWC' : 'Aura';
                     this.component.name = stackTraceLine.substring(stackTraceLine.lastIndexOf('/') + 1, stackTraceLine.lastIndexOf('.js'));
@@ -100,4 +150,3 @@ const LogBuilder = class {
 export function newLogBuilder() {
     return new LogBuilder();
 }
-
