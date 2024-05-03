@@ -470,25 +470,18 @@ public without sharing class Log {
     }
 
     /**
-     * Autogenrated Transaction UUID
      * This value can be passed around to trace a complex process spanning multiple Salesforce transactions
      * Can be used between LWC/Apex/Flow transitions when complex tracing is required.
      */
-    public String TRANSACTION_ID {
-        get {
-            if (TRANSACTION_ID == null) {
-                TRANSACTION_ID = generateUUID4();
-            }
-            return TRANSACTION_ID;
-        }
-        private set;
-    }
+    public String TRANSACTION_ID;
 
     /**
      * Start new transaction
+     * Autogenrated Transaction UUID
      * This method will obtain a new autogenrated transaction id or use the current one
      */
     public String startTransaction() {
+        TRANSACTION_ID = generateUUID4();
         return TRANSACTION_ID;
     }
 
