@@ -189,10 +189,7 @@ public without sharing class Log {
     private static final String CREATED_TIMESTAMP = 'pharos__Created_Timestamp__c';
     private static final String DURATION = 'pharos__Duration__c';
     private static final String LOG_LEVEL = 'Log_Level__c';
-    private static final String CPU_TIME = 'CPU_Time__c';
-    private static final String HEAP_SIZE = 'Heap_Size__c';
-    private static final String SOQL_QUERIES = 'SOQL_Queries__c';
-
+    private static final String RELATED_OBJECTS = 'pharos__Related_Objects__c';
 
     /**
      * A wrapper class for passing log data from flow
@@ -548,15 +545,16 @@ public without sharing class Log {
 
 
     /**
-    * Add Log with Error Category.
+    * Add Log with Error Category and related records.
     * This method will automatically get the stacktrace from Exception.
     * Type will be obtained from Exception. If blank, a default Backend Type will be saved
     * Summary is the Exception message.
     * Details will be a combination of Exception String and stacktrace
     * @param area -- log record Functional Area (see Area enum)
     * @param e -- instance of an Exception
+    * @param relatedObjectIds -- a set of related records to associate with this log
     */
-    public void addError(Area area, Exception e) {
+    public void addError(Area area, Exception e, Set<String> relatedObjectIds) {
         add(
                 makeBuilder()
                         .category(Category.Apex.name())
@@ -567,19 +565,41 @@ public without sharing class Log {
                         .stackTrace(e.getStackTraceString())
                         .details(String.valueOf(e) + SPACE_SEP + e.getStackTraceString())
                         .transactionId(TRANSACTION_ID)
-                        .createIssue()
+                        .attribute(RELATED_OBJECTS, relatedObjectIds?.size() > 0 ? 
+                                        JSON.serialize(relatedObjectIds) : null)
                         .attribute(LOG_LEVEL, Level.ERROR.name())
+                        .createIssue()
                         .build());
+    }
+
+    /**
+    * Add Log with Error Category.
+    * This method will automatically get the stacktrace from Exception.
+    * Type will be obtained from Exception. If blank, a default Backend Type will be saved
+    * Summary is the Exception message.
+    * Details will be a combination of Exception String and stacktrace
+    * @param area -- log record Functional Area (see Area enum)
+    * @param e -- instance of an Exception
+    */
+    public void addError(Area area, Exception e) {
+        incStackOffset();
+        addError(area, e, null);
+        resetStackOffset();
     }
 
     /**
     * Immediate
     */
-    public void error(Area area, Exception e) {
+    public void error(Area area, Exception e, Set<String> relatedObjectIds) {
         incStackOffset();
-        addError(area, e);
+        addError(area, e, relatedObjectIds);
         flush();
         resetStackOffset();
+    }
+
+    public void error(Area area, Exception e) {
+        incStackOffset();
+        error(area, e, null);
     }
 
 
