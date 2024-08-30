@@ -534,9 +534,6 @@ public without sharing class Log {
                         .transactionId(TRANSACTION_ID)
                         .createIssue()
                         .attribute(LOG_LEVEL, Level.ERROR.name())
-                        .attribute(CPU_TIME, System.Limits.getCpuTime())
-                        .attribute(HEAP_SIZE, System.Limits.getHeapSize())
-                        .attribute(SOQL_QUERIES, System.Limits.getQueries())
                         .build());
     }
 
@@ -572,9 +569,6 @@ public without sharing class Log {
                         .transactionId(TRANSACTION_ID)
                         .createIssue()
                         .attribute(LOG_LEVEL, Level.ERROR.name())
-                        .attribute(CPU_TIME, System.Limits.getCpuTime())
-                        .attribute(HEAP_SIZE, System.Limits.getHeapSize())
-                        .attribute(SOQL_QUERIES, System.Limits.getQueries())
                         .build());
     }
 
@@ -613,9 +607,6 @@ public without sharing class Log {
                                         .build())
                         .transactionId(TRANSACTION_ID)
                         .attribute(LOG_LEVEL, Level.WARNING.name())
-                        .attribute(CPU_TIME, System.Limits.getCpuTime())
-                        .attribute(HEAP_SIZE, System.Limits.getHeapSize())
-                        .attribute(SOQL_QUERIES, System.Limits.getQueries())
                         .build());
     }
 
@@ -655,9 +646,6 @@ public without sharing class Log {
                         .stackTrace(this.logger.getCurrentStackTrace(stackOffset))
                         .transactionId(TRANSACTION_ID)
                         .attribute(LOG_LEVEL, Level.DEBUG.name())
-                        .attribute(CPU_TIME, System.Limits.getCpuTime())
-                        .attribute(HEAP_SIZE, System.Limits.getHeapSize())
-                        .attribute(SOQL_QUERIES, System.Limits.getQueries())
                         .build());
     }
 
@@ -696,9 +684,6 @@ public without sharing class Log {
                         .stackTrace(this.logger.getCurrentStackTrace(stackOffset))
                         .transactionId(TRANSACTION_ID)
                         .attribute(LOG_LEVEL, Level.DEBUG.name())
-                        .attribute(CPU_TIME, System.Limits.getCpuTime())
-                        .attribute(HEAP_SIZE, System.Limits.getHeapSize())
-                        .attribute(SOQL_QUERIES, System.Limits.getQueries())
                         .attribute(Log.DURATION, duration)
                         .build());
     }
@@ -738,9 +723,6 @@ public without sharing class Log {
                                         .build())
                         .transactionId(TRANSACTION_ID)
                         .attribute(LOG_LEVEL, level.name())
-                        .attribute(CPU_TIME, System.Limits.getCpuTime())
-                        .attribute(HEAP_SIZE, System.Limits.getHeapSize())
-                        .attribute(SOQL_QUERIES, System.Limits.getQueries())
                         .build());
     }
     /**
@@ -800,9 +782,6 @@ public without sharing class Log {
                         //Set the system field with a json serialized request/response value
                         .attribute(STACKTRACE_PARSE_RESULT, toJson(request, response))
                         .attribute(LOG_LEVEL, Level.ERROR.name())
-                        .attribute(CPU_TIME, System.Limits.getCpuTime())
-                        .attribute(HEAP_SIZE, System.Limits.getHeapSize())
-                        .attribute(SOQL_QUERIES, System.Limits.getQueries())
                         .build());
     }
 
@@ -837,9 +816,6 @@ public without sharing class Log {
                         .createIssue()
                         .attribute(STACKTRACE_PARSE_RESULT, toJson(request, response))
                         .attribute(LOG_LEVEL, Level.ERROR.name())
-                        .attribute(CPU_TIME, System.Limits.getCpuTime())
-                        .attribute(HEAP_SIZE, System.Limits.getHeapSize())
-                        .attribute(SOQL_QUERIES, System.Limits.getQueries())
                         .build());
     }
 
@@ -877,9 +853,6 @@ public without sharing class Log {
                         .createIssue()
                         .attribute(STACKTRACE_PARSE_RESULT, toJson(request,response))
                         .attribute(LOG_LEVEL, Level.ERROR.name())
-                        .attribute(CPU_TIME, System.Limits.getCpuTime())
-                        .attribute(HEAP_SIZE, System.Limits.getHeapSize())
-                        .attribute(SOQL_QUERIES, System.Limits.getQueries())
                         .build());
         resetStackOffset();
     }
@@ -916,9 +889,6 @@ public without sharing class Log {
                         .createIssue()
                         .attribute(STACKTRACE_PARSE_RESULT, toJson(request, response))
                         .attribute(LOG_LEVEL, Level.ERROR.name())
-                        .attribute(CPU_TIME, System.Limits.getCpuTime())
-                        .attribute(HEAP_SIZE, System.Limits.getHeapSize())
-                        .attribute(SOQL_QUERIES, System.Limits.getQueries())
                         .build());
     }
 
