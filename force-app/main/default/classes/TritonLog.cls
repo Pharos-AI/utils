@@ -251,7 +251,7 @@ public without sharing class TritonLog {
                         .summary(summary)
                         .details(details)
                         .postProcessing(
-                                new PostProcessingControlsBuilder()
+                                new Triton.PostProcessingControlsBuilder()
                                         .stackTrace(true)
                                         .userInfo(true)
                                         .objectInfo(true)
@@ -289,7 +289,7 @@ public without sharing class TritonLog {
                         .summary(summary)
                         .details(details)
                         .postProcessing(
-                                new PostProcessingControlsBuilder()
+                                new Triton.PostProcessingControlsBuilder()
                                         .stackTrace(true)
                                         .userInfo(true)
                                         .objectInfo(true)
@@ -327,7 +327,7 @@ public without sharing class TritonLog {
                         .summary(summary)
                         .details(details)
                         .postProcessing(
-                                new PostProcessingControlsBuilder()
+                                new Triton.PostProcessingControlsBuilder()
                                         .stackTrace(true)
                                         .userInfo(true)
                                         .objectInfo(true)
@@ -367,7 +367,7 @@ public without sharing class TritonLog {
                         .summary(summary)
                         .details(details)
                         .postProcessing(
-                                new PostProcessingControlsBuilder()
+                                new Triton.PostProcessingControlsBuilder()
                                         .stackTrace(true)
                                         .userInfo(true)
                                         .objectInfo(true)
