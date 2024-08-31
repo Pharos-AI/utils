@@ -1,0 +1,111 @@
+/**
+    @description Class used to log LWC errors
+ */
+public with sharing class TritonLwcLog {
+
+    /**
+    * Create component logs from LWC
+    * Use this method to persist logs generated from LWC components
+    * @param componentLogs -- a collection of ComponentLog objects
+    */
+    @AuraEnabled
+    public static void saveComponentLogs(List<ComponentLog> componentLogs) {
+        for (ComponentLog componentLog : componentLogs) {
+            instance.add(
+                    makeBuilder()
+                            //category will be fetched from the componentLog
+                            .category(String.isNotBlank(componentLog.category) ? componentLog.category : componentLog.component.category)
+                            //type will be fetched from the componentLog directly, of from the error. If neither are set, Frontend will be used
+                            .type(String.isNotBlank(componentLog.type) ? componentLog.type :
+                                    componentLog.error != null ? componentLog.error.type : Type.Frontend.name())
+                            //area will be fetched from the componentLog directly if set. Otherwise component name will be used
+                            .area(String.isNotBlank(componentLog.area) ? componentLog.area : componentLog.component.name)
+                            //summary will be fetched from the componentLog directly if set. Otherwise, error message will be used if provided.
+                            .summary(String.isNotBlank(componentLog.summary) ? componentLog.summary :
+                                    componentLog.error != null ? componentLog.error.message : null)
+                            .stackTrace(componentLog.stack)
+                            .details(componentLog.details)
+                            //transaction id will be used from the componentLog, or a new transaction id will be generated
+                            .transactionId(String.isNotBlank(componentLog.transactionId) ? componentLog.transactionId : instance.TRANSACTION_ID)
+                            .attribute(USER_ID, componentLog.userId)
+                            //apex name will be set to component.function or component.action
+                            .attribute(APEX_NAME, componentLog.component.name + '.' +
+                                    (String.isNotBlank(componentLog.component.function) ? componentLog.component.function : componentLog.component.action))
+                            .attribute(RELATED_ID, componentLog.recordId)
+                            //created timestamp will be either set from the componentLog if provided, otherwise current timestamp will be used
+                            .attribute(CREATED_TIMESTAMP, componentLog.createdTimestamp != null ? Double.valueOf(componentLog.createdTimestamp) : Double.valueOf(System.now().getTime()))
+                            //log level will be taken from the componentLog if provided, otherwise INFO will be used
+                            .attribute(LOG_LEVEL, String.isNotBlank(componentLog.level) ? componentLog.level : Level.INFO.name())
+                            .attribute(CPU_TIME, System.Limits.getCpuTime())
+                            .attribute(HEAP_SIZE, System.Limits.getHeapSize())
+                            .attribute(SOQL_QUERIES, System.Limits.getQueries())
+                            .attribute(DURATION, componentLog.duration)
+                            .build());
+        }
+        instance.flush();
+    }
+
+    /**
+     * A wrapper class for passing component info data from LWC
+     */
+    public class Component {
+        @AuraEnabled
+        public String category { get; set; }
+        @AuraEnabled
+        public String name { get; set; }
+        @AuraEnabled
+        public String function { get; set; }
+        @AuraEnabled
+        public String action { get; set; }
+    }
+
+    /**
+     * A wrapper class for passing log data from LWC
+     */
+    public class ComponentLog {
+        @AuraEnabled
+        public String category { get; set; }
+        @AuraEnabled
+        public String type { get; set; }
+        @AuraEnabled
+        public String area { get; set; }
+        @AuraEnabled
+        public String summary { get; set; }
+        @AuraEnabled
+        public String details { get; set; }
+        @AuraEnabled
+        public Decimal totalTime { get; set; }
+        @AuraEnabled
+        public String userId { get; set; }
+        @AuraEnabled
+        public String recordId { get; set; }
+        @AuraEnabled
+        public String objectApiName { get; set; }
+        @AuraEnabled
+        public String stack { get; set; }
+        @AuraEnabled
+        public Error error { get; set; }
+        @AuraEnabled
+        public Component component { get; set; }
+        @AuraEnabled
+        public String transactionId { get; set; }
+        @AuraEnabled
+        public Decimal createdTimestamp { get; set; }
+        @AuraEnabled
+        public String level { get; set; }
+        @AuraEnabled
+        public Decimal duration { get; set; }
+    }
+
+    /**
+     * A wrapper class for passing error log data from LWC
+     */
+    public class Error {
+        @AuraEnabled
+        public String message { get; set; }
+        @AuraEnabled
+        public String stack { get; set; }
+        @AuraEnabled
+        public String type { get; set; }
+    }
+}

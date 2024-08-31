@@ -1,5 +1,5 @@
 @IsTest
-private class LogTest {
+private class TritonLogTest {
 
     private static void assertCreatedLog(Log.Category logCategory) {
         List<pharos__Log__c> logs = [SELECT Id, pharos__Category__c, pharos__Hash__c FROM pharos__Log__c];

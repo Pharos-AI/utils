@@ -1,8 +1,8 @@
 import {LightningElement, api} from 'lwc';
-import {newLogBuilder} from 'c/logBuilder';
+import {makeBuilder} from 'c/tritonBuilder';
 import saveComponentLogs from '@salesforce/apex/Log.saveComponentLogs';
 
-export default class Logger extends LightningElement {
+export default class Triton extends LightningElement {
 
     /**
      * Logs buffer
@@ -19,7 +19,7 @@ export default class Logger extends LightningElement {
      */
     @api
     addException(error) {
-        return this._newLogBuilder().setError(error).setLevel(LEVEL.ERROR);
+        return this._makeBuilder().setError(error).setLevel(LEVEL.ERROR);
     }
 
     /**
@@ -27,7 +27,7 @@ export default class Logger extends LightningElement {
      */
     @api
     addError() {
-        return this._newLogBuilder().setLevel(LEVEL.ERROR);
+        return this._makeBuilder().setLevel(LEVEL.ERROR);
     }
 
     /**
@@ -35,7 +35,7 @@ export default class Logger extends LightningElement {
      */
     @api
     addWarning() {
-        return this._newLogBuilder().setCategory(CATEGORY.WARNING).setLevel(LEVEL.WARNING);
+        return this._makeBuilder().setCategory(CATEGORY.WARNING).setLevel(LEVEL.WARNING);
     }
 
     /**
@@ -43,7 +43,7 @@ export default class Logger extends LightningElement {
      */
     @api
     addDebug() {
-        return this._newLogBuilder().setCategory(CATEGORY.DEBUG).setLevel(LEVEL.DEBUG);
+        return this._makeBuilder().setCategory(CATEGORY.DEBUG).setLevel(LEVEL.DEBUG);
     }
 
     /**
@@ -51,7 +51,7 @@ export default class Logger extends LightningElement {
      */
     @api
     addInfo() {
-        return this._newLogBuilder().setCategory(CATEGORY.EVENT).setLevel(LEVEL.INFO);
+        return this._makeBuilder().setCategory(CATEGORY.EVENT).setLevel(LEVEL.INFO);
     }
 
     /**
@@ -63,7 +63,7 @@ export default class Logger extends LightningElement {
      */
     @api
     exception(error, transactionId) {
-        this._newLogBuilder()
+        this._makeBuilder()
             .setError(error)
             .setLevel(LEVEL.ERROR)
             .setTransactionId(transactionId);
@@ -75,7 +75,7 @@ export default class Logger extends LightningElement {
      */
     @api
     error(type, area, summary, details, transactionId, component, duration, startTime) {
-        this._newLogBuilder()
+        this._makeBuilder()
             .setLevel(LEVEL.ERROR)
             .setType(type)
             .setArea(area)
@@ -93,7 +93,7 @@ export default class Logger extends LightningElement {
      */
     @api
     warning(type, area, summary, details, transactionId, component, duration, startTime) {
-        this._newLogBuilder()
+        this._makeBuilder()
             .setLevel(LEVEL.WARNING)
             .setCategory(CATEGORY.WARNING)
             .setType(type)
@@ -112,7 +112,7 @@ export default class Logger extends LightningElement {
      */
     @api
     debug(type, area, summary, details, transactionId, component, duration, startTime) {
-        this._newLogBuilder()
+        this._makeBuilder()
             .setLevel(LEVEL.DEBUG)
             .setCategory(CATEGORY.DEBUG)
             .setType(type)
@@ -131,7 +131,7 @@ export default class Logger extends LightningElement {
      */
     @api
     info(type, area, summary, details, level, transactionId, component, duration, startTime) {
-        this._newLogBuilder()
+        this._makeBuilder()
             .setLevel(level)
             .setCategory(CATEGORY.EVENT)
             .setType(type)
@@ -159,13 +159,22 @@ export default class Logger extends LightningElement {
         this.logs = [];
     }
 
-    _newLogBuilder() {
-        let logBuilder = newLogBuilder();
+    _makeBuilder() {
+        let logBuilder = makeBuilder();
         this.logs.push(logBuilder);
         return logBuilder;
     }
 
 }
+
+/** AREA */
+export const AREA = {
+    ACCOUNTS: 'ACCOUNTS',
+    Community: 'COMMUNITY',
+    LEAD_CONVERSION: 'LEAD_CONVERSION',
+    OPPORTUNITY_MANAGEMENT,
+    REST_API: 'REST_API'
+};
 
 /** LOG LEVEL */
 export const LEVEL = {

@@ -1,36 +1,19 @@
-public without sharing class Log {
-    /**
-     * -----------------------------
-     * HELPER METHODS AND CONSTANTS
-     * -----------------------------
-     */
-
-    /**
-     * Generates a UUID.
-     * Used to create a transaction Id
-     */
-    public static String generateUUID4() {
-        Blob b = Crypto.generateAesKey(128);
-        String h = EncodingUtil.convertToHex(b);
-        String guid = h.substring(0,8)+ '-' + h.substring(8,12) + '-' + h.substring(12,16) + '-' + h.substring(16,20) + '-' + h.substring(20);
-        return guid;
-    }
-
+/**
+    @decription main Triton Log class
+ */
+public without sharing class TritonLog {
 
     //singleton instance
     private final pharos.Logger logger;
-    public static Log instance {
+    
+    public static TritonLog instance {
         get {
             if (instance == null) {
-                instance = new Log(pharos.Logger.getInstance());
+                instance = new TritonLog(pharos.Logger.getInstance());
             }
             return instance;
         }
         private set;
-    }
-
-    private Log(pharos.Logger logger) {
-        this.logger = logger;
     }
 
     /**
@@ -55,6 +38,25 @@ public without sharing class Log {
     @TestVisible
     private static Log_Level__mdt[] LOG_LEVELS_MDT = Log_Level__mdt.getAll().values();
 
+    /** private static final class members */
+    private static final String APEX_NAME = 'pharos__Apex_Name__c';
+    private static final String CREATED_TIMESTAMP = 'pharos__Created_Timestamp__c';
+    private static final String DURATION = 'pharos__Duration__c';
+    private static final String INTERVIEW_GUID = 'pharos__Interview_GUID_External__c';
+    private static final String LOG_LEVEL = 'Log_Level__c';
+    private static final String RELATED_ID = 'pharos__Related_Id__c';
+    private static final String RELATED_OBJECTS = 'pharos__Related_Objects__c';
+    private static final String STACKTRACE_PARSE_RESULT = 'pharos__Stacktrace_Parse_Result__c';
+    private static final String SPACE_SEP = '\n\n';
+    private static final String USER_ID = 'pharos__User_Id__c';
+
+
+    // Constructor
+    private TritonLog(pharos.Logger logger) {
+        this.logger = logger;
+    }
+
+
     /**
     * Adds a log to the buffer.
     * Performs a check on current log level prior
@@ -67,101 +69,11 @@ public without sharing class Log {
     }
 
     /**
-    * Checks if a log should be persisted based on the current log level
-    * @param log -- Pharos log record to be saved
-    * @return -- true if current log's level is below the level set in the settings, false otherwise
-    */
-    public static Boolean isLogAllowedForLogLevel(pharos__Log__c log) {
-        if (String.isBlank(log.Log_Level__c) || LOG_LEVELS.isEmpty()) return true;
-
-        //a set of possible mapping permutations
-        //these will be checked in the same order as this list
-        String[] permutations = new String[] {
-                buildLogLevelKey(log.pharos__Category__c, log.pharos__Type__c, log.pharos__Area__c),
-                buildLogLevelKey(log.pharos__Category__c, log.pharos__Type__c, null),
-                buildLogLevelKey(log.pharos__Category__c, null, log.pharos__Area__c),
-                buildLogLevelKey(null, log.pharos__Type__c, log.pharos__Area__c),
-                buildLogLevelKey(null, null, log.pharos__Area__c),
-                buildLogLevelKey(null, log.pharos__Type__c, null),
-                buildLogLevelKey(log.pharos__Category__c, null, null),
-                buildLogLevelKey(null, null, null)
-        };
-
-        Level currentLevel = Level.valueOf(log.Log_Level__c);
-        for (String key : permutations) {
-            if (LOG_LEVELS.containsKey(key)) {
-                if (compareLevel(LOG_LEVELS.get(key), currentLevel)) return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-    * Creates a key for log level based on:
-    * @param category -- log category field
-    * @param tye -- log type field
-    * @param area -- log functional area field
-    * @return -- a string with values in the following format: Category:{0};Type:{1};Area:{2}
-    */
-    private static String buildLogLevelKey(String category, String type, String area) {
-        return String.format('Category:{0};Type:{1};Area:{2}', new String[]{category, type, area});
-    }
-
-    /**
-    * Compares 2 log levels.
-    * @param value -- this is the value compared against
-    * @param toCompare -- comparison performed against this value
-    * @return -- if value is higher than toCompare returns false, otherwise true
-    */
-    private static Boolean compareLevel(Level value, Level toCompare) {
-        return value.ordinal() >= toCompare.ordinal();
-    }
-
-    /**
     * Persist Log records immediately.
     * Use this method to persist logs to the database right away.
     */
     public void flush() {
         this.logger.flush();
-    }
-
-    /**
-    * Shorthand method for creating a new builder
-    */
-    public static pharos.LogBuilder makeBuilder() {
-        return pharos.LogBuilder.getInstance();
-    }
-
-    /**
-    * Json serialization for http request and response objects.
-    * Used by integration logs.
-    */
-    public static String toJson(RestRequest request, RestResponse response) {
-        return JSON.serialize(new IntegrationWrapper(
-                new pharos.HttpRequestWrapper(request).formatRequest(),
-                new pharos.HttpResponseWrapper(response).formatResponse()
-        ));
-    }
-
-    public static String toJson(HttpRequest request, HttpResponse response) {
-        return JSON.serialize(new IntegrationWrapper(
-                new pharos.HttpRequestWrapper(request).formatRequest(),
-                new pharos.HttpResponseWrapper(response).formatResponse()
-        ));
-    }
-
-    /**
-    * Wrapper class for integration logs
-    * Used to create the Json structure that combines http objects
-    */
-    public class IntegrationWrapper {
-        public Map<String, Object> request;
-        public Map<String, Object> response;
-        public IntegrationWrapper(Map<String, Object> request, Map<String, Object> response) {
-            this.request = request;
-            this.response = response;
-        }
     }
 
     /**
@@ -178,292 +90,11 @@ public without sharing class Log {
         stackOffset = 0;
     }
 
-    //new line separator for formatting
-    private static final String SPACE_SEP = '\n\n';
-
-    private static final String USER_ID = 'pharos__User_Id__c';
-    private static final String APEX_NAME = 'pharos__Apex_Name__c';
-    private static final String RELATED_ID = 'pharos__Related_Id__c';
-    private static final String INTERVIEW_GUID = 'pharos__Interview_GUID_External__c';
-    private static final String STACKTRACE_PARSE_RESULT = 'pharos__Stacktrace_Parse_Result__c';
-    private static final String CREATED_TIMESTAMP = 'pharos__Created_Timestamp__c';
-    private static final String DURATION = 'pharos__Duration__c';
-    private static final String LOG_LEVEL = 'Log_Level__c';
-    private static final String RELATED_OBJECTS = 'pharos__Related_Objects__c';
-
     /**
-     * A wrapper class for passing log data from flow
-     */
-    public class FlowLog {
-        @InvocableVariable(Required=true Label='Category')
-        public String category;
-        @InvocableVariable(Required=true Label='Type')
-        public String type;
-        @InvocableVariable(Required=true Label='Area')
-        public String area;
-        @InvocableVariable(Required=true Label='Summary')
-        public String summary;
-        @InvocableVariable(Required=true Label='Details')
-        public String details;
-        @InvocableVariable(Required=true Label='Interview GUID')
-        public String interviewGUID;
-        @InvocableVariable(Required=false Label='Additional Fields')
-        public String additionalFields;
-    }
-
-    /**
-     * A wrapper class for passing log data from LWC
-     */
-    public class ComponentLog {
-        @AuraEnabled
-        public String category { get; set; }
-        @AuraEnabled
-        public String type { get; set; }
-        @AuraEnabled
-        public String area { get; set; }
-        @AuraEnabled
-        public String summary { get; set; }
-        @AuraEnabled
-        public String details { get; set; }
-        @AuraEnabled
-        public Decimal totalTime { get; set; }
-        @AuraEnabled
-        public String userId { get; set; }
-        @AuraEnabled
-        public String recordId { get; set; }
-        @AuraEnabled
-        public String objectApiName { get; set; }
-        @AuraEnabled
-        public String stack { get; set; }
-        @AuraEnabled
-        public Error error { get; set; }
-        @AuraEnabled
-        public Component component { get; set; }
-        @AuraEnabled
-        public String transactionId { get; set; }
-        @AuraEnabled
-        public Decimal createdTimestamp { get; set; }
-        @AuraEnabled
-        public String level { get; set; }
-        @AuraEnabled
-        public Decimal duration { get; set; }
-    }
-
-    /**
-     * A wrapper class for passing error log data from LWC
-     */
-    public class Error {
-        @AuraEnabled
-        public String message { get; set; }
-        @AuraEnabled
-        public String stack { get; set; }
-        @AuraEnabled
-        public String type { get; set; }
-    }
-
-    /**
-     * A wrapper class for passing component info data from LWC
-     */
-    public class Component {
-        @AuraEnabled
-        public String category { get; set; }
-        @AuraEnabled
-        public String name { get; set; }
-        @AuraEnabled
-        public String function { get; set; }
-        @AuraEnabled
-        public String action { get; set; }
-    }
-
-    /**
-     * Builder class for constructing Pharos post processing settings
-     */
-    public class PostProcessingControlsBuilder {
-
-        private final Map<String, Boolean> controls;
-
-        private final String STACK_TRACE_KEY = 'stackTrace';
-        private final String USER_INFO_KEY = 'userInfo';
-        private final String OBJECT_INFO_KEY = 'objectInfo';
-        private final String RELATED_OBJECTS_KEY = 'relatedObjects';
-        private final String DEPLOY_RESULT_KEY = 'deployResult';
-        private final String AUDIT_TRAIL_KEY = 'auditTrail';
-        private final String PENDING_JOBS_KEY = 'pendingJobs';
-        private final String TOTAL_ACTIVE_SESSION_KEY = 'totalActiveSession';
-        private final String INSTALLED_PACKAGES_KEY = 'installedPackages';
-
-        private PostProcessingControlsBuilder() {
-            controls = new Map<String, Boolean>{
-                    STACK_TRACE_KEY => false,
-                    USER_INFO_KEY => false,
-                    OBJECT_INFO_KEY => false,
-                    RELATED_OBJECTS_KEY => false,
-                    DEPLOY_RESULT_KEY => false,
-                    AUDIT_TRAIL_KEY => false,
-                    PENDING_JOBS_KEY => false,
-                    TOTAL_ACTIVE_SESSION_KEY => false,
-                    INSTALLED_PACKAGES_KEY => false
-            };
-        }
-
-        /**
-         * Sets all flags to the value provided
-         */
-        public PostProcessingControlsBuilder setAll(Boolean value) {
-            for (String key : controls.keySet()) {
-                controls.put(key, value);
-            }
-            return this;
-        }
-
-        /**
-         * Controls whether stack trace is enhanced by Pharos
-         * Only applicable to Apex and Integration logs
-         */
-        public PostProcessingControlsBuilder stackTrace(Boolean value) {
-            controls.put(STACK_TRACE_KEY, value);
-            return this;
-        }
-
-        /**
-         * Controls whether Pharos fetches User name
-         */
-        public PostProcessingControlsBuilder userInfo(Boolean value) {
-            controls.put(USER_INFO_KEY, value);
-            return this;
-        }
-
-        /**
-         * Controls whether Pharos fetches User name
-         */
-        public PostProcessingControlsBuilder objectInfo(Boolean value) {
-            controls.put(OBJECT_INFO_KEY, value);
-            return this;
-        }
-
-        /**
-         * Controls whether Pharos fetches related objects names
-         */
-        public PostProcessingControlsBuilder relatedObjects(Boolean value) {
-            controls.put(RELATED_OBJECTS_KEY, value);
-            return this;
-        }
-
-        /**
-         * Controls whether Pharos fetches recent deployments
-         */
-        public PostProcessingControlsBuilder deployResult(Boolean value) {
-            controls.put(DEPLOY_RESULT_KEY, value);
-            return this;
-        }
-
-        /**
-         * Controls whether Pharos fetches recent audit trail
-         */
-        public PostProcessingControlsBuilder auditTrail(Boolean value) {
-            controls.put(AUDIT_TRAIL_KEY, value);
-            return this;
-        }
-
-        /**
-         * Controls whether Pharos fetches jobs currently in the flox queue
-         */
-        public PostProcessingControlsBuilder pendingJobs(Boolean value) {
-            controls.put(PENDING_JOBS_KEY, value);
-            return this;
-        }
-
-        /**
-         * Controls whether Pharos fetches the number of currently logged in users
-         */
-        public PostProcessingControlsBuilder totalActiveSession(Boolean value) {
-            controls.put(TOTAL_ACTIVE_SESSION_KEY, value);
-            return this;
-        }
-
-        /**
-         * Controls whether Pharos fetches the number of currently installed packages
-         */
-        public PostProcessingControlsBuilder installedPackages(Boolean value) {
-            controls.put(INSTALLED_PACKAGES_KEY, value);
-            return this;
-        }
-
-        /**
-         * Returns a Json version of the settings
-         */
-        public String build() {
-            return JSON.serialize(controls);
-        }
-
-    }
-
-
-
-    /**
-    * Log Levels.
-    * Values listed from the least verbose to the most verbose
+    * Shorthand method for creating a new builder
     */
-    public enum Level {
-        ERROR,
-        WARNING,
-        INFO,
-        DEBUG,
-        FINE,
-        FINER,
-        FINEST
-    }
-
-    /**
-    * Log classification.
-    * Use these enums to provide values for Category, Type and Functional Area fields on the log record.
-    * These fields are useful for analytics and should be populated on all records.
-    * Feel free to modify these or add new values as you see fit. It is best to stick to the
-    * general spirit of the definition.
-    */
-
-    /**
-    * Category.
-    * Provides general classification. Defaults are Error, Warning, Event, Debug.
-    * This value will be written to the Category field.
-    * These values should reflect what kind of log entry they represent at a high level.
-    */
-    public enum Category {
-        Apex,
-        Flow,
-        Warning,
-        Event,
-        Debug,
-        Integration
-    }
-
-    /**
-    * Type.
-    * Provides a more specific classification. This value will be written to the Type field.
-    * Defaults are Backend and Frontend.
-    * This value represents a more specific technical classification.
-    * When an Exception is provided, the methods below will use the Exception type.
-    */
-    public enum Type {
-        Backend,
-        Frontend,
-        LongRunningRequest,
-        ConcurrentRequestsLimit,
-        AccountTrigger
-    }
-
-    /**
-    * Area.
-    * Represents the functional area. This value will be written to the Functional Area field.
-    * These values should represent the functional area from a business perspective.
-    * E.g. DealRegistration, PartnerCommunity, CustomPipelineUI.
-    */
-    public enum Area {
-        OpportunityManagement,
-        LeadConversion,
-        Community,
-        RestAPI,
-        Accounts
+    public static pharos.LogBuilder makeBuilder() {
+        return pharos.LogBuilder.getInstance();
     }
 
     /**
@@ -922,90 +553,15 @@ public without sharing class Log {
     }
 
     /**
-    * ---------------------------
-    * Flow/LWC log methods
-    * ---------------------------
+    * Wrapper class for integration logs
+    * Used to create the Json structure that combines http objects
     */
-
-    /**
-    * Create component logs from LWC
-    * Use this method to persist logs generated from LWC components
-    * @param componentLogs -- a collection of ComponentLog objects
-    */
-    @AuraEnabled
-    public static void saveComponentLogs(List<ComponentLog> componentLogs) {
-        for (ComponentLog componentLog : componentLogs) {
-            instance.add(
-                    makeBuilder()
-                            //category will be fetched from the componentLog
-                            .category(String.isNotBlank(componentLog.category) ? componentLog.category : componentLog.component.category)
-                            //type will be fetched from the componentLog directly, of from the error. If neither are set, Frontend will be used
-                            .type(String.isNotBlank(componentLog.type) ? componentLog.type :
-                                    componentLog.error != null ? componentLog.error.type : Type.Frontend.name())
-                            //area will be fetched from the componentLog directly if set. Otherwise component name will be used
-                            .area(String.isNotBlank(componentLog.area) ? componentLog.area : componentLog.component.name)
-                            //summary will be fetched from the componentLog directly if set. Otherwise, error message will be used if provided.
-                            .summary(String.isNotBlank(componentLog.summary) ? componentLog.summary :
-                                    componentLog.error != null ? componentLog.error.message : null)
-                            .stackTrace(componentLog.stack)
-                            .details(componentLog.details)
-                            //transaction id will be used from the componentLog, or a new transaction id will be generated
-                            .transactionId(String.isNotBlank(componentLog.transactionId) ? componentLog.transactionId : instance.TRANSACTION_ID)
-                            .attribute(USER_ID, componentLog.userId)
-                            //apex name will be set to component.function or component.action
-                            .attribute(APEX_NAME, componentLog.component.name + '.' +
-                                    (String.isNotBlank(componentLog.component.function) ? componentLog.component.function : componentLog.component.action))
-                            .attribute(RELATED_ID, componentLog.recordId)
-                            //created timestamp will be either set from the componentLog if provided, otherwise current timestamp will be used
-                            .attribute(CREATED_TIMESTAMP, componentLog.createdTimestamp != null ? Double.valueOf(componentLog.createdTimestamp) : Double.valueOf(System.now().getTime()))
-                            //log level will be taken from the componentLog if provided, otherwise INFO will be used
-                            .attribute(LOG_LEVEL, String.isNotBlank(componentLog.level) ? componentLog.level : Level.INFO.name())
-                            .attribute(CPU_TIME, System.Limits.getCpuTime())
-                            .attribute(HEAP_SIZE, System.Limits.getHeapSize())
-                            .attribute(SOQL_QUERIES, System.Limits.getQueries())
-                            .attribute(DURATION, componentLog.duration)
-                            .build());
+    public class IntegrationWrapper {
+        public Map<String, Object> request;
+        public Map<String, Object> response;
+        public IntegrationWrapper(Map<String, Object> request, Map<String, Object> response) {
+            this.request = request;
+            this.response = response;
         }
-        instance.flush();
     }
-
-    /**
-     * @description
-     * Invocable method, that can be called via flow.
-     * Defaults to INFO log level
-     * @param flowLogs The list of FlowLog instances to save
-     */
-    @InvocableMethod(Category='Logging' Label='Add Log' Description='Creates a log for a flow or process builder')
-    public static void flow(List<FlowLog> flowLogs) {
-        for (FlowLog flowLog : flowLogs) {
-            Pharos.LogBuilder builder = makeBuilder();
-            builder
-                    .category(Category.Flow.name())
-                    .type(flowLog.type)
-                    .area(flowLog.area)
-                    .summary(flowLog.summary)
-                    .details(flowLog.details)
-                    .transactionId(Log.instance.TRANSACTION_ID)
-                    .attribute(INTERVIEW_GUID, flowLog.interviewGUID)
-                    .attribute(LOG_LEVEL, Level.INFO.name())
-                    .attribute(CPU_TIME, System.Limits.getCpuTime())
-                    .attribute(HEAP_SIZE, System.Limits.getHeapSize())
-                    .attribute(SOQL_QUERIES, System.Limits.getQueries());
-
-            if (String.isNotBlank(flowLog.additionalFields)) {
-                try {
-                    Map<String, Object> mapAdditionalFields = (Map<String, Object>)JSON.deserializeUntyped(flowLog.additionalFields);
-                    for (String field : mapAdditionalFields.keySet()) {
-                        builder.attribute(field, mapAdditionalFields.get(field));
-                    }
-                } catch (Exception e) {
-                    builder.details(flowLog.details + '\nAdditional Information (failed to parse json input to invokable):' + '\n' + flowLog.additionalFields);
-                }
-            }
-            instance.add(builder.build());
-        }
-        instance.flush();
-    }
-
-
 }
