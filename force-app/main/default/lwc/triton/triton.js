@@ -1,6 +1,6 @@
 import {LightningElement, api} from 'lwc';
 import {makeBuilder} from 'c/tritonBuilder';
-import saveComponentLogs from '@salesforce/apex/Log.saveComponentLogs';
+import saveComponentLogs from '@salesforce/apex/TritonLwcLog.saveComponentLogs';
 
 export default class Triton extends LightningElement {
 
@@ -176,6 +176,15 @@ export const AREA = {
     REST_API: 'REST_API'
 };
 
+/** LOG CATEGORY */
+export const CATEGORY = {
+    LWC: 'LWC',
+    AURA: 'Aura',
+    WARNING: 'Warning',
+    DEBUG: 'Debug',
+    EVENT: 'Event'
+};
+
 /** LOG LEVEL */
 export const LEVEL = {
     ERROR: 'ERROR',
@@ -185,15 +194,6 @@ export const LEVEL = {
     FINE: 'FINE',
     FINER: 'FINER',
     FINEST: 'FINEST'
-};
-
-/** LOG CATEGORY */
-export const CATEGORY = {
-    LWC: 'LWC',
-    AURA: 'Aura',
-    WARNING: 'Warning',
-    DEBUG: 'Debug',
-    EVENT: 'Event'
 };
 
 /** LOG TYPE */

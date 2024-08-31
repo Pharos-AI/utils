@@ -20,7 +20,7 @@ public with sharing class TritonHelper {
     * @param toCompare -- comparison performed against this value
     * @return -- if value is higher than toCompare returns false, otherwise true
     */
-    public static Boolean compareLevel(Level value, Level toCompare) {
+    public static Boolean compareLevel(TritonType.Level value, TritonType.Level toCompare) {
         return value.ordinal() >= toCompare.ordinal();
     }
 
@@ -43,51 +43,33 @@ public with sharing class TritonHelper {
     }
 
     /**
-    * Checks if a log should be persisted based on the current log level
-    * @param log -- Pharos log record to be saved
-    * @return -- true if current log's level is below the level set in the settings, false otherwise
-    */
-    public static Boolean isLogAllowedForLogLevel(pharos__Log__c log) {
-        if (String.isBlank(log.Log_Level__c) || LOG_LEVELS.isEmpty()) return true;
-
-        //a set of possible mapping permutations
-        //these will be checked in the same order as this list
-        String[] permutations = new String[] {
-                buildLogLevelKey(log.pharos__Category__c, log.pharos__Type__c, log.pharos__Area__c),
-                buildLogLevelKey(log.pharos__Category__c, log.pharos__Type__c, null),
-                buildLogLevelKey(log.pharos__Category__c, null, log.pharos__Area__c),
-                buildLogLevelKey(null, log.pharos__Type__c, log.pharos__Area__c),
-                buildLogLevelKey(null, null, log.pharos__Area__c),
-                buildLogLevelKey(null, log.pharos__Type__c, null),
-                buildLogLevelKey(log.pharos__Category__c, null, null),
-                buildLogLevelKey(null, null, null)
-        };
-
-        Level currentLevel = Level.valueOf(log.Log_Level__c);
-        for (String key : permutations) {
-            if (LOG_LEVELS.containsKey(key)) {
-                if (compareLevel(LOG_LEVELS.get(key), currentLevel)) return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
     * Json serialization for http request and response objects.
     * Used by integration logs.
     */
     public static String toJson(RestRequest request, RestResponse response) {
-        return JSON.serialize(new TritonLog.IntegrationWrapper(
+        return JSON.serialize(new TritonHelper.IntegrationWrapper(
             new pharos.HttpRequestWrapper(request).formatRequest(),
             new pharos.HttpResponseWrapper(response).formatResponse()
         ));
     }
 
     public static String toJson(HttpRequest request, HttpResponse response) {
-        return JSON.serialize(new TritonLog.IntegrationWrapper(
+        return JSON.serialize(new TritonHelper.IntegrationWrapper(
             new pharos.HttpRequestWrapper(request).formatRequest(),
             new pharos.HttpResponseWrapper(response).formatResponse()
         ));
+    }
+
+    /**
+    * Wrapper class for integration logs
+    * Used to create the Json structure that combines http objects
+    */
+    public class IntegrationWrapper {
+        public Map<String, Object> request;
+        public Map<String, Object> response;
+        public IntegrationWrapper(Map<String, Object> request, Map<String, Object> response) {
+            this.request = request;
+            this.response = response;
+        }
     }
 }

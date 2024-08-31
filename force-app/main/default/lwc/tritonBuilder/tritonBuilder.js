@@ -1,4 +1,4 @@
-const LogBuilder = class {
+const TritonBuilder = class {
 
     /**
      * Constructor used to generate each log
@@ -131,7 +131,7 @@ const LogBuilder = class {
             if (!this.component) this.component = {}
             let stackTraceLines = [];
             stack.split('\n').filter(
-                stackTraceLine => !stackTraceLine.includes('/c/logger.js') && !stackTraceLine.includes('/c/logBuilder.js')
+                stackTraceLine => !stackTraceLine.includes('/c/triton.js') && !stackTraceLine.includes('/c/tritonBuilder.js')
             ).forEach(stackTraceLine => {
                 console.log(stackTraceLine);
                 if (!this.component.category && (stackTraceLine.includes('/modules/') || stackTraceLine.includes('/components/'))) {
@@ -147,6 +147,6 @@ const LogBuilder = class {
 
 }
 
-export function newLogBuilder() {
-    return new LogBuilder();
+export function makeBuilder() {
+    return new TritonBuilder();
 }

@@ -10,14 +10,15 @@ public with sharing class TritonLwcLog {
     */
     @AuraEnabled
     public static void saveComponentLogs(List<ComponentLog> componentLogs) {
+        TritonLog logInstance = TritonLog.instance;
         for (ComponentLog componentLog : componentLogs) {
-            instance.add(
-                    makeBuilder()
+            logInstance.add(
+                    TritonLog.makeBuilder()
                             //category will be fetched from the componentLog
                             .category(String.isNotBlank(componentLog.category) ? componentLog.category : componentLog.component.category)
                             //type will be fetched from the componentLog directly, of from the error. If neither are set, Frontend will be used
                             .type(String.isNotBlank(componentLog.type) ? componentLog.type :
-                                    componentLog.error != null ? componentLog.error.type : Type.Frontend.name())
+                                    componentLog.error != null ? componentLog.error.type : TritonType.Type.Frontend.name())
                             //area will be fetched from the componentLog directly if set. Otherwise component name will be used
                             .area(String.isNotBlank(componentLog.area) ? componentLog.area : componentLog.component.name)
                             //summary will be fetched from the componentLog directly if set. Otherwise, error message will be used if provided.
@@ -26,23 +27,23 @@ public with sharing class TritonLwcLog {
                             .stackTrace(componentLog.stack)
                             .details(componentLog.details)
                             //transaction id will be used from the componentLog, or a new transaction id will be generated
-                            .transactionId(String.isNotBlank(componentLog.transactionId) ? componentLog.transactionId : instance.TRANSACTION_ID)
-                            .attribute(USER_ID, componentLog.userId)
+                            .transactionId(String.isNotBlank(componentLog.transactionId) ? componentLog.transactionId : logInstance.TRANSACTION_ID)
+                            .attribute(TritonLog.USER_ID, componentLog.userId)
                             //apex name will be set to component.function or component.action
-                            .attribute(APEX_NAME, componentLog.component.name + '.' +
+                            .attribute(TritonLog.APEX_NAME, componentLog.component.name + '.' +
                                     (String.isNotBlank(componentLog.component.function) ? componentLog.component.function : componentLog.component.action))
-                            .attribute(RELATED_ID, componentLog.recordId)
+                            .attribute(TritonLog.RELATED_ID, componentLog.recordId)
                             //created timestamp will be either set from the componentLog if provided, otherwise current timestamp will be used
-                            .attribute(CREATED_TIMESTAMP, componentLog.createdTimestamp != null ? Double.valueOf(componentLog.createdTimestamp) : Double.valueOf(System.now().getTime()))
+                            .attribute(TritonLog.CREATED_TIMESTAMP, componentLog.createdTimestamp != null ? Double.valueOf(componentLog.createdTimestamp) : Double.valueOf(System.now().getTime()))
                             //log level will be taken from the componentLog if provided, otherwise INFO will be used
-                            .attribute(LOG_LEVEL, String.isNotBlank(componentLog.level) ? componentLog.level : Level.INFO.name())
-                            .attribute(CPU_TIME, System.Limits.getCpuTime())
-                            .attribute(HEAP_SIZE, System.Limits.getHeapSize())
-                            .attribute(SOQL_QUERIES, System.Limits.getQueries())
-                            .attribute(DURATION, componentLog.duration)
+                            .attribute(TritonLog.LOG_LEVEL, String.isNotBlank(componentLog.level) ? componentLog.level : TritonType.Level.INFO.name())
+                            .attribute(TritonLog.CPU_TIME, System.Limits.getCpuTime())
+                            .attribute(TritonLog.HEAP_SIZE, System.Limits.getHeapSize())
+                            .attribute(TritonLog.SOQL_QUERIES, System.Limits.getQueries())
+                            .attribute(TritonLog.DURATION, componentLog.duration)
                             .build());
         }
-        instance.flush();
+        logInstance.flush();
     }
 
     /**

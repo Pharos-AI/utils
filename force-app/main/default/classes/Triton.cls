@@ -22,17 +22,17 @@ public with sharing class Triton {
         private final String USER_INFO_KEY = 'userInfo';
         
 
-        private PostProcessingControlsBuilder() {
+        public PostProcessingControlsBuilder() {
             controls = new Map<String, Boolean>{
                     AUDIT_TRAIL_KEY => false,
                     DEPLOY_RESULT_KEY => false,
-                    INSTALLED_PACKAGES_KEY => false
+                    INSTALLED_PACKAGES_KEY => false,
                     OBJECT_INFO_KEY => false,
                     PENDING_JOBS_KEY => false,
                     RELATED_OBJECTS_KEY => false,
                     STACK_TRACE_KEY => false,
                     TOTAL_ACTIVE_SESSION_KEY => false,
-                    USER_INFO_KEY => false,
+                    USER_INFO_KEY => false
             };
         }
 

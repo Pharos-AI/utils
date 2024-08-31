@@ -12,19 +12,19 @@ public with sharing class TritonFlowLog {
     @InvocableMethod(Category='TritonLogging' Label='Add Log' Description='Creates a log for a flow or process builder')
     public static void flow(List<FlowLog> flowLogs) {
         for (FlowLog flowLog : flowLogs) {
-            Pharos.LogBuilder builder = makeBuilder();
+            Pharos.LogBuilder builder = TritonLog.makeBuilder();
             builder
-                    .category(Category.Flow.name())
+                    .category(TritonType.Category.Flow.name())
                     .type(flowLog.type)
                     .area(flowLog.area)
                     .summary(flowLog.summary)
                     .details(flowLog.details)
-                    .transactionId(Log.instance.TRANSACTION_ID)
-                    .attribute(INTERVIEW_GUID, flowLog.interviewGUID)
-                    .attribute(LOG_LEVEL, Level.INFO.name())
-                    .attribute(CPU_TIME, System.Limits.getCpuTime())
-                    .attribute(HEAP_SIZE, System.Limits.getHeapSize())
-                    .attribute(SOQL_QUERIES, System.Limits.getQueries());
+                    .transactionId(TritonLog.instance.TRANSACTION_ID)
+                    .attribute(TritonLog.INTERVIEW_GUID, flowLog.interviewGUID)
+                    .attribute(TritonLog.LOG_LEVEL, TritonType.Level.INFO.name())
+                    .attribute(TritonLog.CPU_TIME, System.Limits.getCpuTime())
+                    .attribute(TritonLog.HEAP_SIZE, System.Limits.getHeapSize())
+                    .attribute(TritonLog.SOQL_QUERIES, System.Limits.getQueries());
 
             if (String.isNotBlank(flowLog.additionalFields)) {
                 try {
@@ -36,9 +36,9 @@ public with sharing class TritonFlowLog {
                     builder.details(flowLog.details + '\nAdditional Information (failed to parse json input to invokable):' + '\n' + flowLog.additionalFields);
                 }
             }
-            instance.add(builder.build());
+            TritonLog.instance.add(builder.build());
         }
-        instance.flush();
+        TritonLog.instance.flush();
     }
 
 
