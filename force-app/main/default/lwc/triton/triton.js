@@ -1,6 +1,6 @@
 import {LightningElement, api} from 'lwc';
 import {makeBuilder} from 'c/tritonBuilder';
-import saveComponentLogs from '@salesforce/apex/TritonLwcLog.saveComponentLogs';
+import saveComponentLogs from '@salesforce/apex/TritonLwc.saveComponentLogs';
 
 export default class Triton extends LightningElement {
 
