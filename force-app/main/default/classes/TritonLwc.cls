@@ -1,7 +1,7 @@
 /**
     @description Class used to log LWC errors
  */
-public with sharing class TritonLwcLog {
+public with sharing class TritonLwc {
 
     /**
     * Create component logs from LWC
@@ -10,10 +10,10 @@ public with sharing class TritonLwcLog {
     */
     @AuraEnabled
     public static void saveComponentLogs(List<ComponentLog> componentLogs) {
-        TritonLog logInstance = TritonLog.instance;
+        Triton logInstance = Triton.instance;
         for (ComponentLog componentLog : componentLogs) {
             logInstance.add(
-                    TritonLog.makeBuilder()
+                    Triton.makeBuilder()
                             //category will be fetched from the componentLog
                             .category(String.isNotBlank(componentLog.category) ? componentLog.category : componentLog.component.category)
                             //type will be fetched from the componentLog directly, of from the error. If neither are set, Frontend will be used
@@ -28,19 +28,16 @@ public with sharing class TritonLwcLog {
                             .details(componentLog.details)
                             //transaction id will be used from the componentLog, or a new transaction id will be generated
                             .transactionId(String.isNotBlank(componentLog.transactionId) ? componentLog.transactionId : logInstance.TRANSACTION_ID)
-                            .attribute(TritonLog.USER_ID, componentLog.userId)
+                            .attribute(Triton.USER_ID, componentLog.userId)
                             //apex name will be set to component.function or component.action
-                            .attribute(TritonLog.APEX_NAME, componentLog.component.name + '.' +
+                            .attribute(Triton.APEX_NAME, componentLog.component.name + '.' +
                                     (String.isNotBlank(componentLog.component.function) ? componentLog.component.function : componentLog.component.action))
-                            .attribute(TritonLog.RELATED_ID, componentLog.recordId)
+                            .attribute(Triton.RELATED_ID, componentLog.recordId)
                             //created timestamp will be either set from the componentLog if provided, otherwise current timestamp will be used
-                            .attribute(TritonLog.CREATED_TIMESTAMP, componentLog.createdTimestamp != null ? Double.valueOf(componentLog.createdTimestamp) : Double.valueOf(System.now().getTime()))
+                            .attribute(Triton.CREATED_TIMESTAMP, componentLog.createdTimestamp != null ? Double.valueOf(componentLog.createdTimestamp) : Double.valueOf(System.now().getTime()))
                             //log level will be taken from the componentLog if provided, otherwise INFO will be used
-                            .attribute(TritonLog.LOG_LEVEL, String.isNotBlank(componentLog.level) ? componentLog.level : TritonTypes.Level.INFO.name())
-                            .attribute(TritonLog.CPU_TIME, System.Limits.getCpuTime())
-                            .attribute(TritonLog.HEAP_SIZE, System.Limits.getHeapSize())
-                            .attribute(TritonLog.SOQL_QUERIES, System.Limits.getQueries())
-                            .attribute(TritonLog.DURATION, componentLog.duration)
+                            .attribute(Triton.LOG_LEVEL, String.isNotBlank(componentLog.level) ? componentLog.level : TritonTypes.Level.INFO.name())
+                            .attribute(Triton.DURATION, componentLog.duration)
                             .build());
         }
         logInstance.flush();
