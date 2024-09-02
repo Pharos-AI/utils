@@ -1,7 +1,7 @@
 @IsTest
-private class LogTest {
+private class TritonTest {
 
-    private static void assertCreatedLog(Log.Category logCategory) {
+    private static void assertCreatedLog(TritonTypes.Category logCategory) {
         List<pharos__Log__c> logs = [SELECT Id, pharos__Category__c, pharos__Hash__c FROM pharos__Log__c];
         System.assertEquals(1, logs.size());
         System.assertNotEquals(null, logs.get(0).pharos__Hash__c);
@@ -10,8 +10,8 @@ private class LogTest {
     private static void assertCreatedIntegrationLog() {
         List<pharos__Log__c> logs = [SELECT Id, pharos__Category__c, pharos__Hash__c FROM pharos__Log__c];
         System.assertNotEquals(1, logs.size());
-        System.assertEquals(Log.Category.Integration.name(), logs.get(0).pharos__Category__c);
-        System.assertEquals(Log.Category.Integration.name(), logs.get(1).pharos__Category__c);
+        System.assertEquals(TritonTypes.Category.Integration.name(), logs.get(0).pharos__Category__c);
+        System.assertEquals(TritonTypes.Category.Integration.name(), logs.get(1).pharos__Category__c);
         System.assertNotEquals(null, logs.get(0).pharos__Hash__c);
         System.assertNotEquals(null, logs.get(1).pharos__Hash__c);
     }
@@ -31,12 +31,12 @@ private class LogTest {
         assertBefore();
 
         Log_Level__mdt ll = new Log_Level__mdt();
-        ll.Level__c = Log.Level.DEBUG.name();
-        Log.LOG_LEVELS_MDT = new Log_Level__mdt[]{ll};
+        ll.Level__c = TritonTypes.Level.DEBUG.name();
+        Triton.LOG_LEVELS_MDT = new Log_Level__mdt[]{ll};
 
-        System.assertEquals(1, Log.LOG_LEVELS.size());
-        System.assertEquals('Category:null;Type:null;Area:null', new List<String>(Log.LOG_LEVELS.keySet())[0]);
-        System.assertEquals(Log.Level.DEBUG, Log.LOG_LEVELS.get('Category:null;Type:null;Area:null'));
+        System.assertEquals(1, Triton.LOG_LEVELS.size());
+        System.assertEquals('Category:null;Type:null;Area:null', new List<String>(Triton.LOG_LEVELS.keySet())[0]);
+        System.assertEquals(TritonTypes.Level.DEBUG, Triton.LOG_LEVELS.get('Category:null;Type:null;Area:null'));
     }
 
     @IsTest
@@ -44,14 +44,14 @@ private class LogTest {
         assertBefore();
 
         Log_Level__mdt ll = new Log_Level__mdt();
-        ll.Level__c = Log.Level.DEBUG.name();
-        Log.LOG_LEVELS_MDT = new Log_Level__mdt[]{ll};
+        ll.Level__c = TritonTypes.Level.DEBUG.name();
+        Triton.LOG_LEVELS_MDT = new Log_Level__mdt[]{ll};
 
         Test.startTest();
-        Log.instance.event(Log.Level.DEBUG, Log.Type.Backend, Log.Area.Community, 'some event', 'error details');
+        Triton.instance.event(TritonTypes.Level.DEBUG, TritonTypes.Type.Backend, TritonTypes.Area.Community, 'some event', 'error details');
         Test.stopTest();
 
-        assertCreatedLog(Log.Category.Event);
+        assertCreatedLog(TritonTypes.Category.Event);
     }
 
     @IsTest
@@ -59,30 +59,30 @@ private class LogTest {
         assertBefore();
 
         Log_Level__mdt ll = new Log_Level__mdt();
-        ll.Level__c = Log.Level.DEBUG.name();
-        Log.LOG_LEVELS_MDT = new Log_Level__mdt[]{ll};
+        ll.Level__c = TritonTypes.Level.DEBUG.name();
+        Triton.LOG_LEVELS_MDT = new Log_Level__mdt[]{ll};
 
         Test.startTest();
-        Log.instance.event(Log.Level.FINE, Log.Type.Backend, Log.Area.Community, 'some event', 'error details');
+        Triton.instance.event(TritonTypes.Level.FINE, TritonTypes.Type.Backend, TritonTypes.Area.Community, 'some event', 'error details');
         Test.stopTest();
 
-        System.assertEquals(0, [SELECT count() FROM pharos__Log__c where pharos__Category__c=:Log.Category.Event.name()]);
+        System.assertEquals(0, [SELECT count() FROM pharos__Log__c where pharos__Category__c=:TritonTypes.Category.Event.name()]);
     }
 
     private static void setupLogLevelsMap() {
         Log_Level__mdt globalLevel = new Log_Level__mdt();
-        globalLevel.Level__c = Log.Level.DEBUG.name();
+        globalLevel.Level__c = TritonTypes.Level.DEBUG.name();
 
         Log_Level__mdt categoryLevel = new Log_Level__mdt();
-        categoryLevel.Level__c = Log.Level.FINE.name();
-        categoryLevel.Category__c = Log.Category.Event.name();
+        categoryLevel.Level__c = TritonTypes.Level.FINE.name();
+        categoryLevel.Category__c = TritonTypes.Category.Event.name();
 
         Log_Level__mdt categoryAndAreaLevel = new Log_Level__mdt();
-        categoryAndAreaLevel.Level__c = Log.Level.FINEST.name();
-        categoryAndAreaLevel.Category__c = Log.Category.Event.name();
-        categoryAndAreaLevel.Area__c = Log.Area.Community.name();
+        categoryAndAreaLevel.Level__c = TritonTypes.Level.FINEST.name();
+        categoryAndAreaLevel.Category__c = TritonTypes.Category.Event.name();
+        categoryAndAreaLevel.Area__c = TritonTypes.Area.Community.name();
 
-        Log.LOG_LEVELS_MDT = new Log_Level__mdt[]{globalLevel, categoryLevel, categoryAndAreaLevel};
+        Triton.LOG_LEVELS_MDT = new Log_Level__mdt[]{globalLevel, categoryLevel, categoryAndAreaLevel};
     }
 
     @IsTest
@@ -91,18 +91,18 @@ private class LogTest {
 
         setupLogLevelsMap();
 
-        System.assertEquals(3, Log.LOG_LEVELS.size());
-        System.assertEquals(Log.Level.DEBUG, Log.LOG_LEVELS.get('Category:null;Type:null;Area:null'));
-        System.assertEquals(Log.Level.FINE, Log.LOG_LEVELS.get('Category:Event;Type:null;Area:null'));
-        System.assertEquals(Log.Level.FINEST, Log.LOG_LEVELS.get('Category:Event;Type:null;Area:Community'));
+        System.assertEquals(3, Triton.LOG_LEVELS.size());
+        System.assertEquals(TritonTypes.Level.DEBUG, Triton.LOG_LEVELS.get('Category:null;Type:null;Area:null'));
+        System.assertEquals(TritonTypes.Level.FINE, Triton.LOG_LEVELS.get('Category:Event;Type:null;Area:null'));
+        System.assertEquals(TritonTypes.Level.FINEST, Triton.LOG_LEVELS.get('Category:Event;Type:null;Area:Community'));
 
 
 
         Test.startTest();
-        Log.instance.event(Log.Level.FINEST, Log.Type.Backend, Log.Area.Community, 'some event', 'error details');
+        Triton.instance.event(TritonTypes.Level.FINEST, TritonTypes.Type.Backend, TritonTypes.Area.Community, 'some event', 'error details');
         Test.stopTest();
 
-        assertCreatedLog(Log.Category.Event);
+        assertCreatedLog(TritonTypes.Category.Event);
     }
 
     @IsTest
@@ -112,10 +112,10 @@ private class LogTest {
         setupLogLevelsMap();
 
         Test.startTest();
-        Log.instance.event(Log.Level.FINEST, Log.Type.Backend, Log.Area.OpportunityManagement, 'some event', 'error details');
+        Triton.instance.event(TritonTypes.Level.FINEST, TritonTypes.Type.Backend, TritonTypes.Area.OpportunityManagement, 'some event', 'error details');
         Test.stopTest();
 
-        System.assertEquals(0, [SELECT COUNT() FROM pharos__Log__c WHERE pharos__Category__c = :Log.Category.Event.name()]);
+        System.assertEquals(0, [SELECT COUNT() FROM pharos__Log__c WHERE pharos__Category__c = :TritonTypes.Category.Event.name()]);
     }
 
     @IsTest
@@ -123,10 +123,10 @@ private class LogTest {
         assertBefore();
 
         Test.startTest();
-        Log.instance.event(Log.Type.Backend, Log.Area.Community, 'some event', 'error details');
+        Triton.instance.event(TritonTypes.Type.Backend, TritonTypes.Area.Community, 'some event', 'error details');
         Test.stopTest();
 
-        assertCreatedLog(Log.Category.Event);
+        assertCreatedLog(TritonTypes.Category.Event);
     }
 
     @IsTest
@@ -134,10 +134,10 @@ private class LogTest {
         assertBefore();
 
         Test.startTest();
-        Log.instance.debug(Log.Type.Backend, Log.Area.Community, 'some debug', 'error details');
+        Triton.instance.debug(TritonTypes.Type.Backend, TritonTypes.Area.Community, 'some debug', 'error details');
         Test.stopTest();
 
-        assertCreatedLog(Log.Category.Debug);
+        assertCreatedLog(TritonTypes.Category.Debug);
     }
 
     @IsTest
@@ -145,10 +145,10 @@ private class LogTest {
         assertBefore();
 
         Test.startTest();
-        Log.instance.warning(Log.Type.Backend, Log.Area.Community, 'some warning', 'error details');
+        Triton.instance.warning(TritonTypes.Type.Backend, TritonTypes.Area.Community, 'some warning', 'error details');
         Test.stopTest();
 
-        assertCreatedLog(Log.Category.Warning);
+        assertCreatedLog(TritonTypes.Category.Warning);
     }
 
     @IsTest
@@ -156,10 +156,10 @@ private class LogTest {
         assertBefore();
 
         Test.startTest();
-        Log.instance.error(Log.Type.Backend, Log.Area.Community, 'some error', 'error details');
+        Triton.instance.error(TritonTypes.Type.Backend, TritonTypes.Area.Community, 'some error', 'error details');
         Test.stopTest();
 
-        assertCreatedLog(Log.Category.Apex);
+        assertCreatedLog(TritonTypes.Category.Apex);
     }
 
     @IsTest
@@ -171,11 +171,11 @@ private class LogTest {
             Integer i = 2/0;
         }
         catch(Exception e) {
-            Log.instance.error(Log.Area.Community, e);
+            Triton.instance.error(TritonTypes.Area.Community, e);
         }
         Test.stopTest();
 
-        assertCreatedLog(Log.Category.Apex);
+        assertCreatedLog(TritonTypes.Category.Apex);
     }
 
     @IsTest
@@ -206,7 +206,7 @@ private class LogTest {
         req.httpMethod = 'GET';
         RestContext.request = req;
         RestContext.response = res;
-        Log.instance.integrationError(Log.Type.Backend, Log.Area.Community, 'test summary', 'test details', req, res);
+        Triton.instance.integrationError(TritonTypes.Type.Backend, TritonTypes.Area.Community, 'test summary', 'test details', req, res);
         Test.stopTest();
 
         List<pharos__Log__c> logs = [SELECT Id, pharos__Summary__c, pharos__Hash__c FROM pharos__Log__c];
@@ -220,8 +220,8 @@ private class LogTest {
         assertBefore();
 
         Test.startTest();
-        List<Log.ComponentLog> componentLogs = new List<Log.ComponentLog>();
-        Log.ComponentLog componentLog = new Log.ComponentLog();
+        List<TritonLwc.ComponentLog> componentLogs = new List<TritonLwc.ComponentLog>();
+        TritonLwc.ComponentLog componentLog = new TritonLwc.ComponentLog();
         componentLog.category = 'test category';
         componentLog.type = 'test type';
         componentLog.area = 'test area';
@@ -229,13 +229,13 @@ private class LogTest {
         componentLog.details = 'test details';
         componentLog.recordId = 'recordId';
         componentLog.objectApiName = 'objectApiName';
-        Log.Component component = new Log.Component();
+        TritonLwc.Component component = new TritonLwc.Component();
         component.category = 'test category';
         component.name = 'test name';
         component.function = 'test function';
         componentLog.component = component;
         componentLogs.add(componentLog);
-        Log.saveComponentLogs(componentLogs);
+        TritonLwc.saveComponentLogs(componentLogs);
         Test.stopTest();
 
         List<pharos__Log__c> logs = [SELECT Id, pharos__Summary__c, pharos__Hash__c FROM pharos__Log__c];
@@ -249,8 +249,8 @@ private class LogTest {
         assertBefore();
 
         Test.startTest();
-        List<Log.FlowLog> flowLogs = new List<Log.FlowLog>();
-        Log.FlowLog flowLog = new Log.FlowLog();
+        List<TritonFlow.FlowLog> flowLogs = new List<TritonFlow.FlowLog>();
+        TritonFlow.FlowLog flowLog = new TritonFlow.FlowLog();
         flowLog.category = 'test category';
         flowLog.type = 'test type';
         flowLog.area = 'test area';
@@ -258,7 +258,7 @@ private class LogTest {
         flowLog.details = 'test';
         flowLog.additionalFields = '{"pharos__Summary__c":"test summary","pharos__Details__c":"test Details"}';
         flowLogs.add(flowLog);
-        Log.flow(flowLogs);
+        TritonFlow.log(flowLogs);
         Test.stopTest();
 
         List<pharos__Log__c> logs = [SELECT Id, pharos__Summary__c, pharos__Hash__c FROM pharos__Log__c];
@@ -296,10 +296,10 @@ private class LogTest {
         try {
             res = h.send(req);
             if (res.getStatusCode() != 200 || res.getStatusCode() != 201) {
-                Log.instance.integrationError(Log.Type.Backend, Log.Area.Community, 'test integration', 'test error details', req, res);
+                Triton.instance.integrationError(TritonTypes.Type.Backend, TritonTypes.Area.Community, 'test integration', 'test error details', req, res);
             }
         } catch (Exception e) {
-            Log.instance.integrationError(Log.Area.Community, e, req, res);
+            Triton.instance.integrationError(TritonTypes.Area.Community, e, req, res);
         }
     }
 
