@@ -14,14 +14,14 @@ public with sharing class TritonFlowLog {
         for (FlowLog flowLog : flowLogs) {
             Pharos.LogBuilder builder = TritonLog.makeBuilder();
             builder
-                    .category(TritonType.Category.Flow.name())
+                    .category(TritonTypes.Category.Flow.name())
                     .type(flowLog.type)
                     .area(flowLog.area)
                     .summary(flowLog.summary)
                     .details(flowLog.details)
                     .transactionId(TritonLog.instance.TRANSACTION_ID)
                     .attribute(TritonLog.INTERVIEW_GUID, flowLog.interviewGUID)
-                    .attribute(TritonLog.LOG_LEVEL, TritonType.Level.INFO.name())
+                    .attribute(TritonLog.LOG_LEVEL, TritonTypes.Level.INFO.name())
                     .attribute(TritonLog.CPU_TIME, System.Limits.getCpuTime())
                     .attribute(TritonLog.HEAP_SIZE, System.Limits.getHeapSize())
                     .attribute(TritonLog.SOQL_QUERIES, System.Limits.getQueries());

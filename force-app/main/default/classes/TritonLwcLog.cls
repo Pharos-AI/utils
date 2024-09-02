@@ -18,7 +18,7 @@ public with sharing class TritonLwcLog {
                             .category(String.isNotBlank(componentLog.category) ? componentLog.category : componentLog.component.category)
                             //type will be fetched from the componentLog directly, of from the error. If neither are set, Frontend will be used
                             .type(String.isNotBlank(componentLog.type) ? componentLog.type :
-                                    componentLog.error != null ? componentLog.error.type : TritonType.Type.Frontend.name())
+                                    componentLog.error != null ? componentLog.error.type : TritonTypes.Type.Frontend.name())
                             //area will be fetched from the componentLog directly if set. Otherwise component name will be used
                             .area(String.isNotBlank(componentLog.area) ? componentLog.area : componentLog.component.name)
                             //summary will be fetched from the componentLog directly if set. Otherwise, error message will be used if provided.
@@ -36,7 +36,7 @@ public with sharing class TritonLwcLog {
                             //created timestamp will be either set from the componentLog if provided, otherwise current timestamp will be used
                             .attribute(TritonLog.CREATED_TIMESTAMP, componentLog.createdTimestamp != null ? Double.valueOf(componentLog.createdTimestamp) : Double.valueOf(System.now().getTime()))
                             //log level will be taken from the componentLog if provided, otherwise INFO will be used
-                            .attribute(TritonLog.LOG_LEVEL, String.isNotBlank(componentLog.level) ? componentLog.level : TritonType.Level.INFO.name())
+                            .attribute(TritonLog.LOG_LEVEL, String.isNotBlank(componentLog.level) ? componentLog.level : TritonTypes.Level.INFO.name())
                             .attribute(TritonLog.CPU_TIME, System.Limits.getCpuTime())
                             .attribute(TritonLog.HEAP_SIZE, System.Limits.getHeapSize())
                             .attribute(TritonLog.SOQL_QUERIES, System.Limits.getQueries())

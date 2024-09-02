@@ -6,7 +6,7 @@
     * Feel free to modify these or add new values as you see fit. It is best to stick to the
     * general spirit of the definition.
  */
-public with sharing class TritonType {
+public with sharing class TritonTypes {
 
     /**
     * Area.

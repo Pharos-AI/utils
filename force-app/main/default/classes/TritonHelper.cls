@@ -20,7 +20,7 @@ public with sharing class TritonHelper {
     * @param toCompare -- comparison performed against this value
     * @return -- if value is higher than toCompare returns false, otherwise true
     */
-    public static Boolean compareLevel(TritonType.Level value, TritonType.Level toCompare) {
+    public static Boolean compareLevel(TritonTypes.Level value, TritonTypes.Level toCompare) {
         return value.ordinal() >= toCompare.ordinal();
     }
 

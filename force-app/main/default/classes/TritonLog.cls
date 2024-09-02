@@ -35,14 +35,14 @@ public without sharing class TritonLog {
     * Helper map for storing current log levels
     */
     @TestVisible
-    private static Map<String, TritonType.Level> LOG_LEVELS {
+    private static Map<String, TritonTypes.Level> LOG_LEVELS {
         get {
             if (LOG_LEVELS == null) {
-                LOG_LEVELS = new Map<String, TritonType.Level>();
+                LOG_LEVELS = new Map<String, TritonTypes.Level>();
                 for(Log_Level__mdt ll : LOG_LEVELS_MDT) {
                     LOG_LEVELS.put(
                             TritonHelper.buildLogLevelKey(ll.Category__c, ll.Type__c, ll.Area__c),
-                            TritonType.Level.valueOf(ll.Level__c));
+                            TritonTypes.Level.valueOf(ll.Level__c));
                 }
             }
             return LOG_LEVELS;
@@ -148,15 +148,15 @@ public without sharing class TritonLog {
     /**
     * Add Log with Error Category.
     * This method will automatically get the stacktrace and save it on the log record.
-    * @param type -- log record TritonType.Type (see Type enum)
-    * @param area -- log record Functional TritonType.Area (see Area enum)
+    * @param type -- log record TritonTypes.Type (see Type enum)
+    * @param area -- log record Functional TritonTypes.Area (see Area enum)
     * @param summary -- summary of the issue. Saves to log record Summary field
     * @param details -- details of the issue. Saves to log record Details field
     */
-    public void addError(TritonType.Type type, TritonType.Area area, String summary, String details) {
+    public void addError(TritonTypes.Type type, TritonTypes.Area area, String summary, String details) {
         add(
                 makeBuilder()
-                        .category(TritonType.Category.Apex.name())
+                        .category(TritonTypes.Category.Apex.name())
                         .type(type.name())
                         .area(area.name())
                         .summary(summary)
@@ -164,14 +164,14 @@ public without sharing class TritonLog {
                         .stackTrace(this.logger.getCurrentStackTrace(stackOffset))
                         .transactionId(TRANSACTION_ID)
                         .createIssue()
-                        .attribute(LOG_LEVEL, TritonType.Level.ERROR.name())
+                        .attribute(LOG_LEVEL, TritonTypes.Level.ERROR.name())
                         .build());
     }
 
     /**
     * Immediate
     */
-    public void error(TritonType.Type type, TritonType.Area area, String summary, String details) {
+    public void error(TritonTypes.Type type, TritonTypes.Area area, String summary, String details) {
         incStackOffset();
         addError(type, area, summary, details);
         flush();
@@ -184,16 +184,16 @@ public without sharing class TritonLog {
     * Type will be obtained from Exception. If blank, a default Backend Type will be saved
     * Summary is the Exception message.
     * Details will be a combination of Exception String and stacktrace
-    * @param area -- log record Functional TritonType.Area (see Area enum)
+    * @param area -- log record Functional TritonTypes.Area (see Area enum)
     * @param e -- instance of an Exception
     * @param relatedObjectIds -- a set of related records to associate with this log
     */
-    public void addError(TritonType.Area area, Exception e, Set<String> relatedObjectIds) {
+    public void addError(TritonTypes.Area area, Exception e, Set<String> relatedObjectIds) {
         add(
                 makeBuilder()
-                        .category(TritonType.Category.Apex.name())
+                        .category(TritonTypes.Category.Apex.name())
                         //use exception type, Backend if blank
-                        .type(String.isBlank(e.getTypeName()) ? TritonType.Type.Backend.name() : e.getTypeName())
+                        .type(String.isBlank(e.getTypeName()) ? TritonTypes.Type.Backend.name() : e.getTypeName())
                         .area(area.name())
                         .summary(e.getMessage())
                         .stackTrace(e.getStackTraceString())
@@ -201,7 +201,7 @@ public without sharing class TritonLog {
                         .transactionId(TRANSACTION_ID)
                         .attribute(RELATED_OBJECTS, relatedObjectIds?.size() > 0 ? 
                                         JSON.serialize(relatedObjectIds) : null)
-                        .attribute(LOG_LEVEL, TritonType.Level.ERROR.name())
+                        .attribute(LOG_LEVEL, TritonTypes.Level.ERROR.name())
                         .createIssue()
                         .build());
     }
@@ -212,10 +212,10 @@ public without sharing class TritonLog {
     * Type will be obtained from Exception. If blank, a default Backend Type will be saved
     * Summary is the Exception message.
     * Details will be a combination of Exception String and stacktrace
-    * @param area -- log record Functional TritonType.Area (see Area enum)
+    * @param area -- log record Functional TritonTypes.Area (see Area enum)
     * @param e -- instance of an Exception
     */
-    public void addError(TritonType.Area area, Exception e) {
+    public void addError(TritonTypes.Area area, Exception e) {
         incStackOffset();
         addError(area, e, null);
         resetStackOffset();
@@ -224,14 +224,14 @@ public without sharing class TritonLog {
     /**
     * Immediate
     */
-    public void error(TritonType.Area area, Exception e, Set<String> relatedObjectIds) {
+    public void error(TritonTypes.Area area, Exception e, Set<String> relatedObjectIds) {
         incStackOffset();
         addError(area, e, relatedObjectIds);
         flush();
         resetStackOffset();
     }
 
-    public void error(TritonType.Area area, Exception e) {
+    public void error(TritonTypes.Area area, Exception e) {
         incStackOffset();
         error(area, e, null);
     }
@@ -240,15 +240,15 @@ public without sharing class TritonLog {
     /**
     * Add Log with Warning Category.
     * This method will not save a stacktrace.
-    * @param type -- log record TritonType.Type (see Type enum)
-    * @param area -- log record Functional TritonType.Area (see Area enum)
+    * @param type -- log record TritonTypes.Type (see Type enum)
+    * @param area -- log record Functional TritonTypes.Area (see Area enum)
     * @param summary -- summary of the issue. Saves to log record Summary field
     * @param details -- details of the issue. Saves to log record Details field
     */
-    public void addWarning(TritonType.Type type, TritonType.Area area, String summary, String details) {
+    public void addWarning(TritonTypes.Type type, TritonTypes.Area area, String summary, String details) {
         add(
                 makeBuilder()
-                        .category(TritonType.Category.Warning.name())
+                        .category(TritonTypes.Category.Warning.name())
                         .type(type.name())
                         .area(area.name())
                         .summary(summary)
@@ -260,14 +260,14 @@ public without sharing class TritonLog {
                                         .objectInfo(true)
                                         .build())
                         .transactionId(TRANSACTION_ID)
-                        .attribute(LOG_LEVEL, TritonType.Level.WARNING.name())
+                        .attribute(LOG_LEVEL, TritonTypes.Level.WARNING.name())
                         .build());
     }
 
     /**
     * Immediate
     */
-    public void warning(TritonType.Type type, TritonType.Area area, String summary, String details) {
+    public void warning(TritonTypes.Type type, TritonTypes.Area area, String summary, String details) {
         incStackOffset();
         addWarning(type, area, summary, details);
         flush();
@@ -278,15 +278,15 @@ public without sharing class TritonLog {
     /**
     * Add Log with Debug Category.
     * This method will automatically get the stacktrace.
-    * @param type -- log record TritonType.Type (see Type enum)
-    * @param area -- log record Functional TritonType.Area (see Area enum)
+    * @param type -- log record TritonTypes.Type (see Type enum)
+    * @param area -- log record Functional TritonTypes.Area (see Area enum)
     * @param summary -- summary of the issue. Saves to log record Summary field
     * @param details -- details of the issue. Saves to log record Details field
     */
-    public void addDebug(TritonType.Type type, TritonType.Area area, String summary, String details) {
+    public void addDebug(TritonTypes.Type type, TritonTypes.Area area, String summary, String details) {
         add(
                 makeBuilder()
-                        .category(TritonType.Category.Debug.name())
+                        .category(TritonTypes.Category.Debug.name())
                         .type(type.name())
                         .area(area.name())
                         .summary(summary)
@@ -299,14 +299,14 @@ public without sharing class TritonLog {
                                         .build())
                         .stackTrace(this.logger.getCurrentStackTrace(stackOffset))
                         .transactionId(TRANSACTION_ID)
-                        .attribute(LOG_LEVEL, TritonType.Level.DEBUG.name())
+                        .attribute(LOG_LEVEL, TritonTypes.Level.DEBUG.name())
                         .build());
     }
 
     /**
     * Immediate
     */
-    public void debug(TritonType.Type type, TritonType.Area area, String summary, String details) {
+    public void debug(TritonTypes.Type type, TritonTypes.Area area, String summary, String details) {
         incStackOffset();
         addDebug(type, area, summary, details);
         flush();
@@ -316,21 +316,21 @@ public without sharing class TritonLog {
     /**
     * Add Log with Debug Category.
     * This method will automatically get the stacktrace.
-    * @param type -- log record TritonType.Type (see Type enum)
-    * @param area -- log record Functional TritonType.Area (see Area enum)
+    * @param type -- log record TritonTypes.Type (see Type enum)
+    * @param area -- log record Functional TritonTypes.Area (see Area enum)
     * @param summary -- summary of the issue. Saves to log record Summary field
     * @param details -- details of the issue. Saves to log record Details field
     */
     public void addDebug(
-        TritonType.Type type,
-        TritonType.Area area,
+        TritonTypes.Type type,
+        TritonTypes.Area area,
         String summary,
         String details,
         Decimal duration
     ) {
         add(
                 makeBuilder()
-                        .category(TritonType.Category.Debug.name())
+                        .category(TritonTypes.Category.Debug.name())
                         .type(type.name())
                         .area(area.name())
                         .summary(summary)
@@ -343,7 +343,7 @@ public without sharing class TritonLog {
                                         .build())
                         .stackTrace(this.logger.getCurrentStackTrace(stackOffset))
                         .transactionId(TRANSACTION_ID)
-                        .attribute(LOG_LEVEL, TritonType.Level.DEBUG.name())
+                        .attribute(LOG_LEVEL, TritonTypes.Level.DEBUG.name())
                         .attribute(TritonLog.DURATION, duration)
                         .build());
     }
@@ -351,7 +351,7 @@ public without sharing class TritonLog {
     /**
     * Immediate
     */
-    public void debug(TritonType.Type type, TritonType.Area area, String summary, String details, Decimal duration) {
+    public void debug(TritonTypes.Type type, TritonTypes.Area area, String summary, String details, Decimal duration) {
         incStackOffset();
         addDebug(type, area, summary, details, duration);
         flush();
@@ -361,22 +361,22 @@ public without sharing class TritonLog {
     /**
     * Add Log with Event Category.
     * Default INFO log level
-    * @param level -- log TritonType.Level (see Level enum)
-    * @param type -- log record TritonType.Type (see Type enum)
-    * @param area -- log record Functional TritonType.Area (see Area enum)
+    * @param level -- log TritonTypes.Level (see Level enum)
+    * @param type -- log record TritonTypes.Type (see Type enum)
+    * @param area -- log record Functional TritonTypes.Area (see Area enum)
     * @param summary -- summary of the issue. Saves to log record Summary field
     * @param details -- details of the issue. Saves to log record Details field
     */
     public void addEvent(
-        TritonType.Level level,
-        TritonType.Type type,
-        TritonType.Area area,
+        TritonTypes.Level level,
+        TritonTypes.Type type,
+        TritonTypes.Area area,
         String summary,
         String details
     ) {
         add(
                 makeBuilder()
-                        .category(TritonType.Category.Event.name())
+                        .category(TritonTypes.Category.Event.name())
                         .type(type.name())
                         .area(area.name())
                         .summary(summary)
@@ -395,9 +395,9 @@ public without sharing class TritonLog {
     * Immediate
     */
     public void event(
-        TritonType.Level level,
-        TritonType.Type type,
-        TritonType.Area area,
+        TritonTypes.Level level,
+        TritonTypes.Type type,
+        TritonTypes.Area area,
         String summary,
         String details
     ) {
@@ -411,23 +411,23 @@ public without sharing class TritonLog {
     /**
     * Add Log with Event Category.
     * Default INFO log level
-    * @param type -- log record TritonType.Type (see Type enum)
+    * @param type -- log record TritonTypes.Type (see Type enum)
     * @param area -- log record Functional Area (see Area enum)
     * @param summary -- summary of the issue. Saves to log record Summary field
     * @param details -- details of the issue. Saves to log record Details field
     */
-    public void addEvent(TritonType.Type type, TritonType.Area area, String summary, String details) {
+    public void addEvent(TritonTypes.Type type, TritonTypes.Area area, String summary, String details) {
         incStackOffset();
-        addEvent(TritonType.Level.INFO, type, area, summary, details);
+        addEvent(TritonTypes.Level.INFO, type, area, summary, details);
         resetStackOffset();
     }
 
     /**
     * Immediate
     */
-    public void event(TritonType.Type type, TritonType.Area area, String summary, String details) {
+    public void event(TritonTypes.Type type, TritonTypes.Area area, String summary, String details) {
         incStackOffset();
-        event(TritonType.Level.INFO, type, area, summary, details);
+        event(TritonTypes.Level.INFO, type, area, summary, details);
         resetStackOffset();
     }
 
@@ -435,17 +435,17 @@ public without sharing class TritonLog {
     /**
     * Add Log with Integration Category.
     * This method will automatically get the stacktrace from Exception.
-    * @param area -- log record Functional TritonType.Area (see Area enum)
+    * @param area -- log record Functional TritonTypes.Area (see Area enum)
     * @param e -- instance of an Exception
     * @param request -- HttpRequest of the issue. Saves to log record Details field
     * @param response -- HttpResponse of the issue. Saves to log record Details field
     */
-    public void addIntegrationError(TritonType.Area area, Exception e, HttpRequest request, HttpResponse response) {
+    public void addIntegrationError(TritonTypes.Area area, Exception e, HttpRequest request, HttpResponse response) {
         add(
                 makeBuilder()
-                        .category(TritonType.Category.Integration.name())
+                        .category(TritonTypes.Category.Integration.name())
                         //Use Backend as default type
-                        .type(String.isBlank(e.getTypeName()) ? TritonType.Type.Backend.name() : e.getTypeName())
+                        .type(String.isBlank(e.getTypeName()) ? TritonTypes.Type.Backend.name() : e.getTypeName())
                         .area(area.name())
                         .summary(e.getMessage())
                         .details(String.valueOf(e) + SPACE_SEP + e.getStackTraceString())
@@ -453,14 +453,14 @@ public without sharing class TritonLog {
                         .createIssue()
                         //Set the system field with a json serialized request/response value
                         .attribute(STACKTRACE_PARSE_RESULT, TritonHelper.toJson(request, response))
-                        .attribute(LOG_LEVEL, TritonType.Level.ERROR.name())
+                        .attribute(LOG_LEVEL, TritonTypes.Level.ERROR.name())
                         .build());
     }
 
     /**
     * Immediate
     */
-    public void integrationError(TritonType.Area area, Exception e, HttpRequest request, HttpResponse response) {
+    public void integrationError(TritonTypes.Area area, Exception e, HttpRequest request, HttpResponse response) {
         incStackOffset();
         addIntegrationError(area, e, request, response);
         flush();
@@ -471,30 +471,30 @@ public without sharing class TritonLog {
     /**
     * Add Log with Integration Category.
     * This method will automatically get the stacktrace from Exception.
-    * @param area -- log record Functional TritonType.Area (see Area enum)
+    * @param area -- log record Functional TritonTypes.Area (see Area enum)
     * @param e -- instance of an Exception
     * @param request -- RestRequest of the issue. Saves to log record Details field
     * @param response -- RestResponse of the issue. Saves to log record Details field
     */
-    public void addIntegrationError(TritonType.Area area, Exception e, RestRequest request, RestResponse response) {
+    public void addIntegrationError(TritonTypes.Area area, Exception e, RestRequest request, RestResponse response) {
         add(
                 makeBuilder()
-                        .category(TritonType.Category.Integration.name())
-                        .type(String.isBlank(e.getTypeName()) ? TritonType.Type.Backend.name() : e.getTypeName())
+                        .category(TritonTypes.Category.Integration.name())
+                        .type(String.isBlank(e.getTypeName()) ? TritonTypes.Type.Backend.name() : e.getTypeName())
                         .area(area.name())
                         .summary(e.getMessage())
                         .details(String.valueOf(e) + SPACE_SEP + e.getStackTraceString())
                         .stackTrace(e.getStackTraceString())
                         .createIssue()
                         .attribute(STACKTRACE_PARSE_RESULT, TritonHelper.toJson(request, response))
-                        .attribute(LOG_LEVEL, TritonType.Level.ERROR.name())
+                        .attribute(LOG_LEVEL, TritonTypes.Level.ERROR.name())
                         .build());
     }
 
     /**
     * Immediate
     */
-    public void integrationError(TritonType.Area area, Exception e, RestRequest request, RestResponse response) {
+    public void integrationError(TritonTypes.Area area, Exception e, RestRequest request, RestResponse response) {
         incStackOffset();
         addIntegrationError(area, e, request, response);
         flush();
@@ -505,16 +505,16 @@ public without sharing class TritonLog {
     /**
     * Add Log with Integration Category.
     * This method will automatically get the stacktrace.
-    * @param type -- log record TritonType.Type (see Type enum)
-    * @param area -- log record Functional TritonType.Area (see Area enum)
+    * @param type -- log record TritonTypes.Type (see Type enum)
+    * @param area -- log record Functional TritonTypes.Area (see Area enum)
     * @param summary -- summary of the issue. Saves to log record Summary field
     * @param details -- details of the issue. Saves to log record Details field
     * @param request -- HttpRequest of the issue. Saves to log record Details field
     * @param response -- HttpResponse of the issue. Saves to log record Details field
     */
     public void addIntegrationError(
-        TritonType.Type type,
-        TritonType.Area area,
+        TritonTypes.Type type,
+        TritonTypes.Area area,
         String summary,
         String details,
         HttpRequest request,
@@ -523,7 +523,7 @@ public without sharing class TritonLog {
         incStackOffset();
         add(
                 makeBuilder()
-                        .category(TritonType.Category.Integration.name())
+                        .category(TritonTypes.Category.Integration.name())
                         .type(type.name())
                         .area(area.name())
                         .summary(summary)
@@ -531,7 +531,7 @@ public without sharing class TritonLog {
                         .stackTrace(this.logger.getCurrentStackTrace(stackOffset))
                         .createIssue()
                         .attribute(STACKTRACE_PARSE_RESULT, TritonHelper.toJson(request,response))
-                        .attribute(LOG_LEVEL, TritonType.Level.ERROR.name())
+                        .attribute(LOG_LEVEL, TritonTypes.Level.ERROR.name())
                         .build());
         resetStackOffset();
     }
@@ -540,8 +540,8 @@ public without sharing class TritonLog {
     * Immediate
     */
     public void integrationError(
-        TritonType.Type type,
-        TritonType.Area area,
+        TritonTypes.Type type,
+        TritonTypes.Area area,
         String summary,
         String details,
         HttpRequest request,
@@ -556,16 +556,16 @@ public without sharing class TritonLog {
     /**
     * Add Log with Integration Category.
     * This method will automatically get the stacktrace.
-    * @param type -- log record TritonType.Type (see Type enum)
-    * @param area -- log record Functional TritonType.Area (see Area enum)
+    * @param type -- log record TritonTypes.Type (see Type enum)
+    * @param area -- log record Functional TritonTypes.Area (see Area enum)
     * @param summary -- summary of the issue. Saves to log record Summary field
     * @param details -- details of the issue. Saves to log record Details field
     * @param request -- RestRequest of the issue. Saves to log record Details field
     * @param response -- RestResponse of the issue. Saves to log record Details field
     */
     public void addIntegrationError(
-        TritonType.Type type,
-        TritonType.Area area,
+        TritonTypes.Type type,
+        TritonTypes.Area area,
         String summary,
         String details,
         RestRequest request,
@@ -573,7 +573,7 @@ public without sharing class TritonLog {
     ) {
         add(
                 makeBuilder()
-                        .category(TritonType.Category.Integration.name())
+                        .category(TritonTypes.Category.Integration.name())
                         .type(type.name())
                         .area(area.name())
                         .summary(summary)
@@ -581,7 +581,7 @@ public without sharing class TritonLog {
                         .stackTrace(this.logger.getCurrentStackTrace(stackOffset))
                         .createIssue()
                         .attribute(STACKTRACE_PARSE_RESULT, TritonHelper.toJson(request, response))
-                        .attribute(LOG_LEVEL, TritonType.Level.ERROR.name())
+                        .attribute(LOG_LEVEL, TritonTypes.Level.ERROR.name())
                         .build());
     }
 
@@ -589,8 +589,8 @@ public without sharing class TritonLog {
     * Immediate
     */
     public void integrationError(
-        TritonType.Type type,
-        TritonType.Area area,
+        TritonTypes.Type type,
+        TritonTypes.Area area,
         String summary,
         String details,
         RestRequest request,
@@ -622,7 +622,7 @@ public without sharing class TritonLog {
                 TritonHelper.buildLogLevelKey(null, null, null)
         };
 
-        TritonType.Level currentLevel = TritonType.Level.valueOf(log.Log_Level__c);
+        TritonTypes.Level currentLevel = TritonTypes.Level.valueOf(log.Log_Level__c);
         for (String key : permutations) {
             if (LOG_LEVELS.containsKey(key)) {
                 if (TritonHelper.compareLevel(LOG_LEVELS.get(key), currentLevel)) return true;
