@@ -8,7 +8,7 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * /
+ */
 
 import {LightningElement, api} from 'lwc';
 import {makeBuilder} from 'c/tritonBuilder';
