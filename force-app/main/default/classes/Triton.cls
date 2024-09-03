@@ -1,9 +1,21 @@
 /**
+ * Copyright (C) 2024 Pharos AI, Inc.
+ *
+ * This file is part of Pharos Triton.
+ *
+ * Pharos Triton is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ */
+
+/**
     @decription main Triton Log class for all things Apex
  */
 public without sharing class Triton {
 
-    /** public static final class members */
+    /** key field names for setting attributes on log records */
     public static final String APEX_NAME = 'pharos__Apex_Name__c';
     public static final String CREATED_TIMESTAMP = 'pharos__Created_Timestamp__c';
     public static final String DURATION = 'pharos__Duration__c';
@@ -12,8 +24,9 @@ public without sharing class Triton {
     public static final String RELATED_ID = 'pharos__Related_Id__c';
     public static final String RELATED_OBJECTS = 'pharos__Related_Objects__c';
     public static final String STACKTRACE_PARSE_RESULT = 'pharos__Stacktrace_Parse_Result__c';
-    public static final String SPACE_SEP = '\n\n';
     public static final String USER_ID = 'pharos__User_Id__c';
+
+    public static final String SPACE_SEP = '\n\n';
     
     public static Triton instance {
         get {
