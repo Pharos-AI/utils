@@ -247,7 +247,7 @@ private class TritonTest {
         component.function = 'test function';
         componentLog.component = component;
         componentLogs.add(componentLog);
-        TritonLwc.saveComponentLogs(componentLogs);
+        TritonLwc.saveComponentLogs(JSON.serialize(componentLogs));
         Test.stopTest();
 
         List<pharos__Log__c> logs = [SELECT Id, pharos__Summary__c, pharos__Hash__c FROM pharos__Log__c];

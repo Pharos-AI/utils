@@ -8,18 +8,15 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * /
+ */
 
-import {LightningElement, api} from 'lwc';
-import {makeBuilder} from 'c/tritonBuilder';
+import { makeBuilder } from 'c/tritonBuilder';
 import saveComponentLogs from '@salesforce/apex/TritonLwc.saveComponentLogs';
 
-export default class Triton extends LightningElement {
-
+const Triton =  class {
     /**
      * Logs buffer
      */
-    @api
     logs = [];
 
     /**
@@ -29,7 +26,6 @@ export default class Triton extends LightningElement {
      * Summary is the Exception message.
      * Details will be a combination of Exception String and stacktrace
      */
-    @api
     addException(error) {
         return this._makeBuilder().setError(error).setLevel(LEVEL.ERROR);
     }
@@ -37,7 +33,6 @@ export default class Triton extends LightningElement {
     /**
      * Add Log with LWC / Aura Category.
      */
-    @api
     addError() {
         return this._makeBuilder().setLevel(LEVEL.ERROR);
     }
@@ -45,7 +40,6 @@ export default class Triton extends LightningElement {
     /**
      * Add Log with Warning Category.
      */
-    @api
     addWarning() {
         return this._makeBuilder().setCategory(CATEGORY.WARNING).setLevel(LEVEL.WARNING);
     }
@@ -53,7 +47,6 @@ export default class Triton extends LightningElement {
     /**
      * Add Log with Debug Category.
      */
-    @api
     addDebug() {
         return this._makeBuilder().setCategory(CATEGORY.DEBUG).setLevel(LEVEL.DEBUG);
     }
@@ -61,7 +54,6 @@ export default class Triton extends LightningElement {
     /**
      * Add Log with Event Category.
      */
-    @api
     addInfo() {
         return this._makeBuilder().setCategory(CATEGORY.EVENT).setLevel(LEVEL.INFO);
     }
@@ -73,7 +65,6 @@ export default class Triton extends LightningElement {
      * Summary is the Exception message.
      * Details will be a combination of Exception String and stacktrace
      */
-    @api
     exception(error, transactionId) {
         this._makeBuilder()
             .setError(error)
@@ -85,7 +76,6 @@ export default class Triton extends LightningElement {
     /**
      * Save Log with LWC / Aura Category.
      */
-    @api
     error(type, area, summary, details, transactionId, component, duration, startTime) {
         this._makeBuilder()
             .setLevel(LEVEL.ERROR)
@@ -103,7 +93,6 @@ export default class Triton extends LightningElement {
     /**
      * Save Log with Warning Category.
      */
-    @api
     warning(type, area, summary, details, transactionId, component, duration, startTime) {
         this._makeBuilder()
             .setLevel(LEVEL.WARNING)
@@ -122,7 +111,6 @@ export default class Triton extends LightningElement {
     /**
      * Save Log with Debug Category.
      */
-    @api
     debug(type, area, summary, details, transactionId, component, duration, startTime) {
         this._makeBuilder()
             .setLevel(LEVEL.DEBUG)
@@ -141,7 +129,6 @@ export default class Triton extends LightningElement {
     /**
      * Save Log with Event Category.
      */
-    @api
     info(type, area, summary, details, level, transactionId, component, duration, startTime) {
         this._makeBuilder()
             .setLevel(level)
@@ -160,24 +147,22 @@ export default class Triton extends LightningElement {
     /**
      * Commit all logs previously added using the addXXX() methods.
      */
-    @api
     flush() {
         saveComponentLogs({
-            componentLogs: this.logs
+            pComponentLogs: JSON.stringify(this.logs)
         }).then((data) => {
         }).catch(error => {
             console.error(error);
         });
         this.logs = [];
     }
-
     _makeBuilder() {
         let logBuilder = makeBuilder();
         this.logs.push(logBuilder);
         return logBuilder;
     }
 
-}
+};
 
 /** AREA */
 export const AREA = {
@@ -213,3 +198,5 @@ export const TYPE = {
     BACKEND: 'Backend',
     FRONTEND: 'Frontend'
 };
+
+export default Triton;
