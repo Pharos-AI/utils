@@ -10,163 +10,159 @@
  *
  */
 
-import {LightningElement} from 'lwc';
-import {makeBuilder} from 'c/tritonBuilder';
+import { makeBuilder } from 'c/tritonBuilder';
 import saveComponentLogs from '@salesforce/apex/TritonLwc.saveComponentLogs';
 
-export const Triton = LightningElement =>
-    class extends LightningElement {
+const Triton =  class {
+    /**
+     * Logs buffer
+     */
+    logs = [];
 
-        /**
-         * Logs buffer
-         */
-        logs = [];
-
-        /**
-         * Add Log with LWC / Aura Category.
-         * This method will automatically get the stacktrace from Exception.
-         * Type will be obtained from Exception. If blank, a default Frontend Type will be saved
-         * Summary is the Exception message.
-         * Details will be a combination of Exception String and stacktrace
-         */
-        addException(error) {
-            return this._makeBuilder().setError(error).setLevel(LEVEL.ERROR);
-        }
-
-        /**
-         * Add Log with LWC / Aura Category.
-         */
-        addError() {
-            return this._makeBuilder().setLevel(LEVEL.ERROR);
-        }
-
-        /**
-         * Add Log with Warning Category.
-         */
-        addWarning() {
-            return this._makeBuilder().setCategory(CATEGORY.WARNING).setLevel(LEVEL.WARNING);
-        }
-
-        /**
-         * Add Log with Debug Category.
-         */
-        addDebug() {
-            return this._makeBuilder().setCategory(CATEGORY.DEBUG).setLevel(LEVEL.DEBUG);
-        }
-
-        /**
-         * Add Log with Event Category.
-         */
-        addInfo() {
-            return this._makeBuilder().setCategory(CATEGORY.EVENT).setLevel(LEVEL.INFO);
-        }
-
-        /**
-         * Save Log with LWC / Aura Category.
-         * This method will automatically get the stacktrace from Exception.
-         * Type will be obtained from Exception. If blank, a default Frontend Type will be saved
-         * Summary is the Exception message.
-         * Details will be a combination of Exception String and stacktrace
-         */
-        exception(error, transactionId) {
-            this._makeBuilder()
-                .setError(error)
-                .setLevel(LEVEL.ERROR)
-                .setTransactionId(transactionId);
-            this.flush();
-        }
-
-        /**
-         * Save Log with LWC / Aura Category.
-         */
-        error(type, area, summary, details, transactionId, component, duration, startTime) {
-            this._makeBuilder()
-                .setLevel(LEVEL.ERROR)
-                .setType(type)
-                .setArea(area)
-                .setSummary(summary)
-                .setDetails(details)
-                .setTransactionId(transactionId)
-                .setComponent(component)
-                .setDuration(duration)
-                .setCreatedTimestamp(startTime);
-            this.flush();
-        }
-
-        /**
-         * Save Log with Warning Category.
-         */
-        warning(type, area, summary, details, transactionId, component, duration, startTime) {
-            this._makeBuilder()
-                .setLevel(LEVEL.WARNING)
-                .setCategory(CATEGORY.WARNING)
-                .setType(type)
-                .setArea(area)
-                .setSummary(summary)
-                .setDetails(details)
-                .setTransactionId(transactionId)
-                .setComponent(component)
-                .setDuration(duration)
-                .setCreatedTimestamp(startTime);
-            this.flush();
-        }
-
-        /**
-         * Save Log with Debug Category.
-         */
-        debug(type, area, summary, details, transactionId, component, duration, startTime) {
-            this._makeBuilder()
-                .setLevel(LEVEL.DEBUG)
-                .setCategory(CATEGORY.DEBUG)
-                .setType(type)
-                .setArea(area)
-                .setSummary(summary)
-                .setDetails(details)
-                .setTransactionId(transactionId)
-                .setComponent(component)
-                .setDuration(duration)
-                .setCreatedTimestamp(startTime);
-            this.flush();
-        }
-
-        /**
-         * Save Log with Event Category.
-         */
-        info(type, area, summary, details, level, transactionId, component, duration, startTime) {
-            this._makeBuilder()
-                .setLevel(level)
-                .setCategory(CATEGORY.EVENT)
-                .setType(type)
-                .setArea(area)
-                .setSummary(summary)
-                .setDetails(details)
-                .setTransactionId(transactionId)
-                .setComponent(component)
-                .setDuration(duration)
-                .setCreatedTimestamp(startTime);
-            this.flush();
-        }
-
-        /**
-         * Commit all logs previously added using the addXXX() methods.
-         */
-        flush() {
-            saveComponentLogs({
-                componentLogs: this.logs
-            }).then((data) => {
-            }).catch(error => {
-                console.error(error);
-            });
-            this.logs = [];
-        }
-
-        _makeBuilder() {
-            let logBuilder = makeBuilder();
-            this.logs.push(logBuilder);
-            return logBuilder;
-        }
-
+    /**
+     * Add Log with LWC / Aura Category.
+     * This method will automatically get the stacktrace from Exception.
+     * Type will be obtained from Exception. If blank, a default Frontend Type will be saved
+     * Summary is the Exception message.
+     * Details will be a combination of Exception String and stacktrace
+     */
+    addException(error) {
+        return this._makeBuilder().setError(error).setLevel(LEVEL.ERROR);
     }
+
+    /**
+     * Add Log with LWC / Aura Category.
+     */
+    addError() {
+        return this._makeBuilder().setLevel(LEVEL.ERROR);
+    }
+
+    /**
+     * Add Log with Warning Category.
+     */
+    addWarning() {
+        return this._makeBuilder().setCategory(CATEGORY.WARNING).setLevel(LEVEL.WARNING);
+    }
+
+    /**
+     * Add Log with Debug Category.
+     */
+    addDebug() {
+        return this._makeBuilder().setCategory(CATEGORY.DEBUG).setLevel(LEVEL.DEBUG);
+    }
+
+    /**
+     * Add Log with Event Category.
+     */
+    addInfo() {
+        return this._makeBuilder().setCategory(CATEGORY.EVENT).setLevel(LEVEL.INFO);
+    }
+
+    /**
+     * Save Log with LWC / Aura Category.
+     * This method will automatically get the stacktrace from Exception.
+     * Type will be obtained from Exception. If blank, a default Frontend Type will be saved
+     * Summary is the Exception message.
+     * Details will be a combination of Exception String and stacktrace
+     */
+    exception(error, transactionId) {
+        this._makeBuilder()
+            .setError(error)
+            .setLevel(LEVEL.ERROR)
+            .setTransactionId(transactionId);
+        this.flush();
+    }
+
+    /**
+     * Save Log with LWC / Aura Category.
+     */
+    error(type, area, summary, details, transactionId, component, duration, startTime) {
+        this._makeBuilder()
+            .setLevel(LEVEL.ERROR)
+            .setType(type)
+            .setArea(area)
+            .setSummary(summary)
+            .setDetails(details)
+            .setTransactionId(transactionId)
+            .setComponent(component)
+            .setDuration(duration)
+            .setCreatedTimestamp(startTime);
+        this.flush();
+    }
+
+    /**
+     * Save Log with Warning Category.
+     */
+    warning(type, area, summary, details, transactionId, component, duration, startTime) {
+        this._makeBuilder()
+            .setLevel(LEVEL.WARNING)
+            .setCategory(CATEGORY.WARNING)
+            .setType(type)
+            .setArea(area)
+            .setSummary(summary)
+            .setDetails(details)
+            .setTransactionId(transactionId)
+            .setComponent(component)
+            .setDuration(duration)
+            .setCreatedTimestamp(startTime);
+        this.flush();
+    }
+
+    /**
+     * Save Log with Debug Category.
+     */
+    debug(type, area, summary, details, transactionId, component, duration, startTime) {
+        this._makeBuilder()
+            .setLevel(LEVEL.DEBUG)
+            .setCategory(CATEGORY.DEBUG)
+            .setType(type)
+            .setArea(area)
+            .setSummary(summary)
+            .setDetails(details)
+            .setTransactionId(transactionId)
+            .setComponent(component)
+            .setDuration(duration)
+            .setCreatedTimestamp(startTime);
+        this.flush();
+    }
+
+    /**
+     * Save Log with Event Category.
+     */
+    info(type, area, summary, details, level, transactionId, component, duration, startTime) {
+        this._makeBuilder()
+            .setLevel(level)
+            .setCategory(CATEGORY.EVENT)
+            .setType(type)
+            .setArea(area)
+            .setSummary(summary)
+            .setDetails(details)
+            .setTransactionId(transactionId)
+            .setComponent(component)
+            .setDuration(duration)
+            .setCreatedTimestamp(startTime);
+        this.flush();
+    }
+
+    /**
+     * Commit all logs previously added using the addXXX() methods.
+     */
+    flush() {
+        saveComponentLogs({
+            pComponentLogs: JSON.stringify(this.logs)
+        }).then((data) => {
+        }).catch(error => {
+            console.error(error);
+        });
+        this.logs = [];
+    }
+    _makeBuilder() {
+        let logBuilder = makeBuilder();
+        this.logs.push(logBuilder);
+        return logBuilder;
+    }
+
+};
 
 /** AREA */
 export const AREA = {
@@ -202,3 +198,5 @@ export const TYPE = {
     BACKEND: 'Backend',
     FRONTEND: 'Frontend'
 };
+
+export default Triton;
